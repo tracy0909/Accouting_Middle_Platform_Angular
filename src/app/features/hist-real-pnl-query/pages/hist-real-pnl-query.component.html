@@ -1,0 +1,337 @@
+<div class="mt-3">
+  <form [formGroup]="formGroup">
+    <p-panel [header]="titleName" [toggleable]="true">
+      <div class="card">
+        <div class="grid p-fluid">
+          <div class="col-12 md:col-2 lg:col-2">
+            <label for="APISERVER" class="bpaas-required"
+              >查詢帳中API主機</label
+            >
+            <p-dropdown
+              id="APISERVER"
+              [options]="apiServerOptions"
+              formControlName="APISERVER"
+              optionValue="value"
+              optionLabel="label"
+              placeholder="請選擇"
+              [ngClass]="{ 'ng-dirty': formControlInvalid('APISERVER') }"
+            ></p-dropdown>
+            <small *ngIf="formControlInvalid('APISERVER')" class="p-error">
+              {{ showErrorMessage('APISERVER') }}
+            </small>
+          </div>
+          <div class="col-12 md:col-2 lg:col-2">
+            <label for="bhno" class="bpaas-required">分公司</label>
+            <p-dropdown
+              id="bhno"
+              [options]="branchOptions"
+              formControlName="bhno"
+              optionValue="value"
+              optionLabel="label"
+              placeholder="請選擇"
+              [ngClass]="{ 'ng-dirty': formControlInvalid('bhno') }"
+            ></p-dropdown>
+            <small *ngIf="formControlInvalid('bhno')" class="p-error">
+              {{ showErrorMessage('bhno') }}
+            </small>
+          </div>
+          <div class="col-12 md:col-2 lg:col-2">
+            <label for="cseq" class="bpaas-required">帳號</label>
+            <input
+              id="cseq"
+              pInputText
+              type="text"
+              formControlName="cseq"
+              [ngClass]="{ 'ng-dirty': formControlInvalid('cseq') }"
+            />
+            <small *ngIf="formControlInvalid('cseq')" class="p-error">
+              {{ showErrorMessage('cseq') }}
+            </small>
+          </div>
+          <div class="col-12 md:col-4 lg:col-4">
+            <app-stock-suggestions
+              [stockControl]="stockControl"
+              [stockNameControl]="stockNameControl"
+            ></app-stock-suggestions>
+          </div>
+          <div class="col-12 md:col-2 lg:col-2">
+            <label for="ttype">交易類別</label>
+            <p-dropdown
+              id="ttype"
+              [options]="transactionTypeOptions"
+              formControlName="ttype"
+              optionValue="value"
+              optionLabel="label"
+              placeholder="請選擇"
+            ></p-dropdown>
+          </div>
+        </div>
+        <div class="grid p-fluid">
+          <div class="col-12 md:col-2 lg:col-2">
+            <label for="ctype">幣別</label>
+            <p-dropdown
+              id="ctype"
+              [options]="currencyTypeOptions"
+              formControlName="ctype"
+              optionValue="value"
+              optionLabel="label"
+              placeholder="請選擇"
+            ></p-dropdown>
+          </div>
+          <div class="col-12 md:col-2 lg:col-2">
+            <label for="bdate" class="bpaas-required">起始日期</label>
+            <p-calendar
+              [showIcon]="true"
+              appendTo="body"
+              dateFormat="yy/mm/dd"
+              dataType="string"
+              formControlName="bdate"
+              [showOnFocus]="false"
+              id="bdate"
+              [ngClass]="{ 'ng-dirty': formControlInvalid('bdate') }"
+            >
+            </p-calendar>
+            <small *ngIf="formControlInvalid('bdate')" class="p-error">
+              {{ showErrorMessage('bdate') }}
+            </small>
+          </div>
+          <div class="col-12 md:col-2 lg:col-2">
+            <label for="edate" class="bpaas-required">
+              結束日期
+              <i
+                class="pi pi-question-circle ml-2"
+                pTooltip="請輸入日期格式如2022/01/01，預設查詢區間近3個月"
+                tooltipPosition="right"
+              ></i>
+            </label>
+            <p-calendar
+              [showIcon]="true"
+              appendTo="body"
+              dateFormat="yy/mm/dd"
+              dataType="string"
+              formControlName="edate"
+              [showOnFocus]="false"
+              id="edate"
+              [ngClass]="{ 'ng-dirty': formControlInvalid('edate') }"
+            >
+            </p-calendar>
+            <small *ngIf="formControlInvalid('edate')" class="p-error">
+              {{ showErrorMessage('edate') }}
+            </small>
+          </div>
+          <div class="grid col-12 md:col-4 lg:col-4 mt-3">
+            <div class="flex col-12 md:col-6 lg:col-6 align-items-center">
+              <p-checkbox
+                [binary]="true"
+                inputId="binary"
+                formControlName="action1"
+              />
+              <label for="action">濾除買進成本為0的股票</label>
+            </div>
+            <div class="flex col-12 md:col-6 lg:col-6 align-items-center">
+              <p-checkbox
+                [binary]="true"
+                inputId="binary"
+                formControlName="action4"
+              />
+              <label for="action4">不計除息金</label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="grid p-fluid justify-content-end bpaas-button-row">
+        <span class="link-url my-auto mr-2" (click)="showDialog()"
+          >計算方式</span
+        >
+        <div *ngIf="buttonList.query" class="col-12 md:col-3 lg:col-2">
+          <button
+            type="button"
+            pButton
+            label="查詢"
+            (click)="doQuery()"
+          ></button>
+        </div>
+        <div *ngIf="buttonList.query" class="col-12 md:col-3 lg:col-2">
+          <button
+            type="button"
+            pButton
+            label="清除"
+            (click)="onClear()"
+            class="p-button-outlined mr-2"
+          ></button>
+        </div>
+      </div>
+    </p-panel>
+  </form>
+</div>
+<div class="flex justify-content-between mb-3 align-items-center">
+  <div *ngIf="queryTime">資料查詢時間：{{ queryTime }}</div>
+  <!-- <div *ngIf="hasSearched && buttonList.download" class="text-right">
+    <button
+      pButton
+      type="button"
+      label="匯出 Excel"
+      icon="pi pi-file-excel"
+      (click)="doExportToExcel()"
+    ></button>
+  </div> -->
+</div>
+<div class="mt-3">
+  <p-panel header="已實現損益" [toggleable]="true">
+    <p-table
+      #histRealPnlQueryTable
+      [value]="tableData"
+      [columns]="tableColumns"
+      [paginator]="false"
+      [rows]="10"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="顯示第 {first} 至 {last} 筆，共 {totalRecords} 筆"
+      [rowsPerPageOptions]="[10, 15, 20]"
+      scrollHeight="75vh"
+      [scrollable]="true"
+      [resizableColumns]="true"
+      styleClass="p-datatable-gridlines p-datatable-sm p-datatable-striped"
+    >
+      <ng-template pTemplate="header">
+        <tr id="bpaas-table-header">
+          <th
+            *ngFor="let column of tableColumns"
+            [pSortableColumn]="column.sortable ? column.field : ''"
+            [pSortableColumnDisabled]="column.sortable ? false : true"
+            scope="col"
+            pResizableColumn
+            [id]="column.field"
+          >
+            {{ column.header }}
+            <p-sortIcon
+              *ngIf="column.sortable"
+              [field]="column.field"
+            ></p-sortIcon>
+          </th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-rowData let-columns="columns">
+        <tr>
+          <td
+            *ngFor="let column of columns"
+            [class.bpaas-align-right]="column.numberField"
+          >
+            <ng-container *ngIf="column.numberField">
+              {{
+                rowData[column.field] ??
+                  (column.numberFieldDefaultZero ? 0 : '') | dynamicDecimal
+              }}
+            </ng-container>
+            <ng-container *ngIf="!column.numberField">
+              {{ rowData[column.field] }}
+            </ng-container>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td [colSpan]="tableColumns.length + 1">沒有符合條件的資料</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-panel>
+</div>
+<div class="mt-3">
+  <p-panel header="對帳單" [toggleable]="true">
+    <p-table
+      #histRealPnlQueryStmtTable
+      [value]="tableData"
+      [columns]="detailTableColumns"
+      scrollHeight="50vh"
+      styleClass="p-datatable-gridlines p-datatable-sm p-datatable-striped"
+    >
+      <ng-template pTemplate="header" let-columns>
+        <tr id="bpaas-table-header">
+          <th
+            *ngFor="let column of columns"
+            [pSortableColumn]="column.sortable ? column.field : ''"
+            [pSortableColumnDisabled]="column.sortable ? false : true"
+            scope="col"
+            pResizableColumn
+          >
+            <label for="{{ column.field }}">
+              {{ column.header }}
+            </label>
+            <p-sortIcon
+              *ngIf="column.sortable"
+              [field]="column.field"
+            ></p-sortIcon>
+          </th>
+        </tr>
+      </ng-template>
+      <ng-template
+        pTemplate="body"
+        let-rowData
+        let-rowIndex="rowIndex"
+        let-columns="columns"
+      >
+        <tr>
+          <td
+            *ngFor="let column of columns"
+            [class.bpaas-align-right]="column.numberField"
+          >
+            <ng-container *ngIf="column.numberField">
+              {{
+                rowData[column.field] ??
+                  (column.numberFieldDefaultZero ? 0 : '') | dynamicDecimal
+              }}
+            </ng-container>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td [colSpan]="detailTableColumns.length + 1">沒有符合條件的資料</td>
+        </tr>
+      </ng-template>
+    </p-table>
+    <div class="mt-2">※對帳單查詢不區分現股與現股當沖，兩者查詢結果相同</div>
+  </p-panel>
+</div>
+<div class="card flex justify-content-center">
+  <p-dialog
+    header="計算方式 "
+    [modal]="true"
+    [(visible)]="visible"
+    [style]="{ width: '50%' }"
+    [draggable]="false"
+  >
+    <div class="p-count-dialog-container">
+      <div class="title">已實現損益</div>
+      <div class="content-section">
+        <div class="text">現股：</div>
+        買進金額 ＝ 買進價金 ＋ 手續費<br />
+        賣出金額 ＝ 賣出價金 － 相關稅費<br />
+        總成交金額 ＝ 買進金額 + 賣出金額<br />
+        損益 ＝ 賣出金額 － 買進金額
+      </div>
+      <div class="content-section">
+        <div class="text">融資：</div>
+        買進金額 ＝ 自備款 ＋ 手續費 ※ 自備款 ＝ 買進價金 － 融資金額<br />
+        賣出金額 ＝ 賣出價金 － 相關稅費 －（融資金額 ＋ 融資利息）
+      </div>
+      <div class="content-section">
+        <div class="text">融券：</div>
+        賣出金額 ＝ 保證金<br />
+        買進金額 ＝ 保證金 ＋ 擔保品－(買進成交金額 + 買進手續費) + 利息 -
+        標借費<br />
+        ※ 擔保品 ＝ 賣出價金 － 相關稅費
+      </div>
+      <div class="content-section">
+        <div class="text">當沖：</div>
+        買進金額 ＝ 資買成交價金 ＋ 手續費
+      </div>
+      <div class="title">對帳單</div>
+      <div class="content-section">
+        <div class="text">融資：</div>
+        總成交價金 ＝ 買進價金 + 賣出價金<br />
+        ※ 對帳單查詢不區分現股與現股當沖，兩者查詢結果相同
+      </div>
+    </div>
+  </p-dialog>
+</div>

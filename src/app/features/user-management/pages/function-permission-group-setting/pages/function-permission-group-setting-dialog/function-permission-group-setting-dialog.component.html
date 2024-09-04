@@ -1,0 +1,147 @@
+<div>
+  <p-panel>
+    <ng-template pTemplate="header">
+      <label for="GroupId">
+        使用者:
+        {{ showUserId }}
+        {{ showUserName }}
+      </label>
+    </ng-template>
+    <div class="grid p-fluid">
+      <!-- Available Data Table -->
+      <div class="col-12 md:col lg:col">
+        <p-table
+          [value]="availableData"
+          [paginator]="true"
+          [rows]="10"
+          [showCurrentPageReport]="true"
+          [rowsPerPageOptions]="[10, 15, 20]"
+          scrollHeight="30rem"
+          [scrollable]="true"
+          styleClass="p-datatable-gridlines p-datatable-sm p-datatable-striped"
+          currentPageReportTemplate="顯示第 {first} 至 {last} 筆，共 {totalRecords} 筆"
+          [(selection)]="chosenSource"
+          selectionMode="multiple"
+          [metaKeySelection]="false"
+        >
+          <ng-template pTemplate="header">
+            <tr id="bpaas-table-header">
+              <th *ngFor="let column of tableColumns" scope="col">
+                {{ column.header }}
+              </th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-user let-rowIndex="rowIndex">
+            <tr [pSelectableRow]="user" [pSelectableRowIndex]="rowIndex">
+              <td *ngFor="let column of tableColumns">
+                {{ user[column.field] }}
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+      <div
+        class="col-12 md:col-1 lg:col-1 flex flex-column justify-content-center"
+      >
+        <div class="mb-2 flex justify-content-center">
+          <button
+            type="button"
+            pButton
+            class="p-button-outlined"
+            icon="pi pi-angle-double-right"
+            (click)="moveAllToSelected()"
+          ></button>
+        </div>
+        <div class="mb-2 flex justify-content-center">
+          <button
+            type="button"
+            pButton
+            class="p-button-outlined"
+            icon="pi pi-chevron-right"
+            (click)="moveToSelected()"
+          ></button>
+        </div>
+        <div class="mb-2 flex justify-content-center">
+          <button
+            type="button"
+            pButton
+            class="p-button-outlined"
+            icon="pi pi-chevron-left"
+            (click)="moveToUnSelected()"
+          ></button>
+        </div>
+        <div class="mb-2 flex justify-content-center">
+          <button
+            type="button"
+            pButton
+            class="p-button-outlined"
+            icon="pi pi-angle-double-left"
+            (click)="moveAllToUnSelected()"
+          ></button>
+        </div>
+      </div>
+      <!-- Selected Data Table -->
+      <div class="col-12 md:col lg:col">
+        <p-table
+          [value]="selectedData"
+          [paginator]="true"
+          [rows]="10"
+          [showCurrentPageReport]="true"
+          [rowsPerPageOptions]="[10, 15, 20]"
+          scrollHeight="30rem"
+          [scrollable]="true"
+          styleClass="p-datatable-gridlines p-datatable-sm p-datatable-striped"
+          currentPageReportTemplate="顯示第 {first} 至 {last} 筆，共 {totalRecords} 筆"
+          [(selection)]="chosenSelected"
+          selectionMode="multiple"
+          [metaKeySelection]="false"
+        >
+          <ng-template pTemplate="header">
+            <tr>
+              <th *ngFor="let column of tableColumns" scope="col">
+                {{ column.header }}
+              </th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-user let-rowIndex="rowIndex">
+            <tr [pSelectableRow]="user" [pSelectableRowIndex]="rowIndex">
+              <td *ngFor="let column of tableColumns">
+                {{ user[column.field] }}
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+    </div>
+    <div class="grid p-fluid justify-content-end bpaas-button-row mt-3 mr-3">
+      <!-- 查詢按鈕 -->
+      <div class="col-12 md:col-3 lg:col-2">
+        <button
+          type="button"
+          pButton
+          label="儲存"
+          (click)="putMgrUserGroup()"
+        ></button>
+      </div>
+      <!-- 重設按鈕 -->
+      <div class="col-12 md:col-3 lg:col-2">
+        <button
+          type="button"
+          pButton
+          label="清除"
+          class="p-button-outlined mr-2"
+          (click)="resetTable()"
+        ></button>
+      </div>
+      <div class="col-12 md:col-3 lg:col-2">
+        <button
+          type="button"
+          pButton
+          label="取消"
+          class="p-button-outlined mr-2"
+          (click)="doCancel()"
+        ></button>
+      </div>
+    </div>
+  </p-panel>
+</div>

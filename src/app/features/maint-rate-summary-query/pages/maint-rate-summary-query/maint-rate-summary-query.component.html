@@ -1,0 +1,185 @@
+<div class="mt-3">
+  <p-panel [header]="titleName" [toggleable]="true">
+    <form [formGroup]="formGroup">
+      <div class="grid p-fluid">
+        <div class="col-12 md:col-2 lg:col-2">
+          <label for="APISERVER" class="bpaas-required">查詢帳中API主機</label>
+          <p-dropdown
+            id="APISERVER"
+            [options]="options"
+            formControlName="APISERVER"
+            optionValue="value"
+            optionLabel="label"
+            placeholder="請選擇"
+            [ngClass]="{ 'ng-dirty': formControlInvalid('APISERVER') }"
+          >
+          </p-dropdown>
+          <div *ngIf="formControlInvalid('APISERVER')">
+            <small
+              class="p-error"
+              *ngIf="formControl('APISERVER').errors?.['required']"
+            >
+              此欄位必須輸入
+            </small>
+          </div>
+        </div>
+
+        <div class="col-12 md:col-2 lg:col-2">
+          <label for="bhno" class="bpaas-required">分公司</label>
+          <p-dropdown
+            id="bhno"
+            [options]="branchOptions"
+            formControlName="bhno"
+            optionValue="value"
+            optionLabel="label"
+            placeholder="請選擇"
+            [ngClass]="{ 'ng-dirty': formControlInvalid('bhno') }"
+          >
+          </p-dropdown>
+          <div *ngIf="formControlInvalid('bhno')">
+            <small
+              class="p-error"
+              *ngIf="formControl('bhno').errors?.['required']"
+            >
+              此欄位必須輸入
+            </small>
+          </div>
+        </div>
+
+        <div class="col-12 md:col-2 lg:col-2">
+          <label for="cseq" class="bpaas-required">客戶帳號</label>
+          <input
+            type="text"
+            id="cseq"
+            pInputText
+            formControlName="cseq"
+            maxlength="7"
+            [ngClass]="{ 'ng-dirty': formControlInvalid('cseq') }"
+          />
+          <small *ngIf="formGroup.controls['cseq']?.touched" class="p-error">
+            {{ showErrorMessage('cseq') }}
+          </small>
+        </div>
+        <div class="col-12 md:col-4 lg:col-4">
+          <app-stock-suggestions
+            [stockControl]="stockControl"
+            [stockNameControl]="stockNameControl"
+          ></app-stock-suggestions>
+        </div>
+        <div class="col-12 md:col-2 lg:col-2">
+          <label class="mr-2" for="type">顯示模式</label>
+          <p-dropdown
+            [options]="typeOptions"
+            formControlName="type"
+            optionLabel="typeName"
+          />
+        </div>
+      </div>
+      <div class="grid p-fluid"></div>
+      <div class="grid p-fluid justify-content-end bpaas-button-row">
+        <div *ngIf="buttonList.query" class="col-12 md:col-3 lg:col-2">
+          <button
+            type="submit"
+            pButton
+            label="查詢"
+            (click)="onSearch()"
+          ></button>
+        </div>
+        <div *ngIf="buttonList.query" class="col-12 md:col-3 lg:col-2">
+          <button
+            type="button"
+            pButton
+            label="清除"
+            class="p-button-outlined mr-2"
+            (click)="onClearForm()"
+          ></button>
+        </div>
+      </div>
+    </form>
+  </p-panel>
+  <div class="flex justify-content-between mb-3 align-items-center">
+    <div *ngIf="queryTime">資料查詢時間：{{ queryTime }}</div>
+    <!-- <div *ngIf="hasSearched && buttonList.download" class="text-right">
+      <button
+        pButton
+        type="button"
+        label="匯出 Excel"
+        icon="pi pi-file-excel"
+        (click)="doExportToExcel()"
+      ></button>
+    </div> -->
+  </div>
+  <div>
+    <p-panel [showHeader]="false">
+      <div class="grid p-fluid">
+        <div class="col-12 md:col-2 lg:col-2">
+          整戶維持率: {{ information.accmrate }}
+        </div>
+        <div class="col-12 md:col-2 lg:col-2">
+          可融資額度: {{ information.crlimit }}
+        </div>
+        <div class="col-12 md:col-2 lg:col-2">
+          可融券額度: {{ information.dblimit }}
+        </div>
+      </div>
+      <p-table
+        #tableCopmonent
+        [value]="summaryDetails"
+        [columns]="tableColumns"
+        [paginator]="true"
+        [rows]="10"
+        [showCurrentPageReport]="true"
+        [rowsPerPageOptions]="[10, 15, 20]"
+        scrollHeight="50vh"
+        [scrollable]="true"
+        styleClass="p-datatable-gridlines p-datatable-sm p-datatable-striped"
+        [resizableColumns]="true"
+        currentPageReportTemplate="顯示第 {first} 至 {last} 筆，共 {totalRecords} 筆"
+        [totalRecords]="summaryDetails.length"
+      >
+        <ng-template pTemplate="header">
+          <tr id="bpaas-table-header">
+            <th
+              *ngFor="let column of tableColumns"
+              [pSortableColumn]="column.sortable ? column.field : ''"
+              [pSortableColumnDisabled]="
+                column.sortable && column.field !== 'no' ? false : true
+              "
+              [id]="'th-' + column.header"
+              pResizableColumn
+            >
+              {{ column.header }}
+              <p-sortIcon
+                *ngIf="column.sortable && column.field !== 'no'"
+                [field]="column.field"
+              ></p-sortIcon>
+            </th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-offer>
+          <tr>
+            <td
+              *ngFor="let header of tableColumns"
+              [class.bpaas-align-right]="header.numberField"
+            >
+              <ng-container *ngIf="header.numberField">
+                {{
+                  offer[header.field] ??
+                    (header.numberFieldDefaultZero ? 0 : '') | dynamicDecimal
+                }}
+              </ng-container>
+              <ng-container *ngIf="!header.numberField">
+                {{ offer[header.field] }}
+              </ng-container>
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td [colSpan]="tableColumns.length + 1">沒有符合條件的資料</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </p-panel>
+  </div>
+</div>

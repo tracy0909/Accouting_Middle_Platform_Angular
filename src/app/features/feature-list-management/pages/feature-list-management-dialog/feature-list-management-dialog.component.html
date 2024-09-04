@@ -1,0 +1,152 @@
+<p-panel>
+  <form [formGroup]="formGroup">
+    <div class="grid p-fluid">
+      <div class="col-6">
+        <label for="ModuleId" class="bpaas-required">系統功能代碼</label>
+        <input
+          type="text"
+          id="ModuleId"
+          pInputText
+          formControlName="ModuleId"
+        />
+        <small *ngIf="formGroup.controls['ModuleId']?.touched" class="p-error">
+          {{ showErrorMessage('ModuleId') }}
+        </small>
+      </div>
+      <div class="col-6">
+        <label for="ModuleName" class="bpaas-required">功能名稱</label>
+        <input
+          type="text"
+          id="ModuleName"
+          pInputText
+          formControlName="ModuleName"
+        />
+        <small
+          *ngIf="formGroup.controls['ModuleName']?.touched"
+          class="p-error"
+        >
+          {{ showErrorMessage('ModuleName') }}
+        </small>
+      </div>
+      <div class="col-6">
+        <label for="OrderSeq" class="bpaas-required">排序</label>
+        <p-inputNumber
+          formControlName="OrderSeq"
+          inputId="OrderSeq"
+          [useGrouping]="false"
+          [min]="1"
+        />
+        <small *ngIf="formGroup.controls['OrderSeq']?.touched" class="p-error">
+          {{ showErrorMessage('OrderSeq') }}
+        </small>
+      </div>
+      <div class="col-6">
+        <label for="ParentId">父層功能代碼：</label>
+        <input
+          type="text"
+          id="ParentId"
+          pInputText
+          formControlName="ParentId"
+        />
+      </div>
+      <div class="col-6">
+        <label for="Level" class="bpaas-required">功能階層</label>
+        <p-inputNumber
+          formControlName="Level"
+          inputId="Level"
+          [useGrouping]="false"
+        />
+        <small *ngIf="formGroup.controls['Level']?.touched" class="p-error">
+          {{ showErrorMessage('Level') }}
+        </small>
+      </div>
+      <div class="col-6">
+        <label for="Status" class="bpaas-required">狀態</label>
+        <div>
+          <p-radioButton
+            name="Status"
+            value="啟用"
+            formControlName="Status"
+            label="啟用"
+          ></p-radioButton>
+          <p-radioButton
+            name="Status"
+            value="停用"
+            formControlName="Status"
+            label="停用"
+          ></p-radioButton>
+        </div>
+      </div>
+      <div class="col-12">
+        <label for="Remark" class="bpaas-required">描述</label>
+        <input type="text" id="Remark" pInputText formControlName="Remark" />
+        <small *ngIf="formGroup.controls['Remark']?.touched" class="p-error">
+          {{ showErrorMessage('Remark') }}
+        </small>
+      </div>
+      <div class="col-12">
+        <label for="Url">程式路徑</label>
+        <input type="text" id="Url" pInputText formControlName="Url" />
+      </div>
+      <div class="col-12">
+        <label for="ButtonList">按鈕列表:</label>
+        <div style="display: flex; flex-wrap: wrap">
+          <div
+            *ngFor="let button of buttons"
+            class="field-checkbox"
+            style="margin-right: 10px"
+          >
+            <p-checkbox
+              [label]="button.name"
+              name="group"
+              [formControlName]="button.formName"
+              [binary]="true"
+            ></p-checkbox>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</p-panel>
+<div class="flex justify-content-end bpaas-dialog-footer">
+  <div class="mr-2">
+    <button
+      type="button"
+      pButton
+      label="儲存"
+      icon="pi pi-save"
+      (click)="onSave()"
+      [disabled]="formGroup.invalid"
+    ></button>
+  </div>
+  <div class="mr-2">
+    <button
+      type="button"
+      pButton
+      label="清除"
+      icon="pi pi-wrench"
+      class="p-button-outlined"
+      (click)="onClearForm()"
+    ></button>
+  </div>
+  <div class="mr-2" *ngIf="buttonList.delete">
+    <button
+      type="button"
+      pButton
+      label="刪除"
+      icon="pi pi-trash"
+      (click)="deleteTreeNode()"
+      [disabled]="!isEdit"
+    ></button>
+  </div>
+  <div>
+    <button
+      type="button"
+      pButton
+      label="取消"
+      icon="pi pi-times"
+      class="p-button-outlined"
+      (click)="onCloseDialog()"
+    ></button>
+  </div>
+</div>

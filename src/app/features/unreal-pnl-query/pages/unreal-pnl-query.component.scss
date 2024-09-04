@@ -1,0 +1,15 @@
+$red-color: red;
+
+.red-text {
+  color: $red-color;
+}
+.red-info-container {
+  display: grid;
+  place-items: center;
+}
+// 調整成本 button
+.center-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

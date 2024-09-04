@@ -1,0 +1,230 @@
+<div class="mt-3">
+  <p-panel [header]="titleName" [toggleable]="true">
+    <div class="card">
+      <form [formGroup]="formGroup">
+        <div class="grid p-fluid">
+          <div class="col-12 md:col-2 lg:col-2">
+            <label for="DBSource" class="bpaas-required">資料庫別</label>
+            <p-dropdown
+              id="DBSource"
+              [options]="dbOption"
+              formControlName="DBSource"
+              optionValue="value"
+              optionLabel="label"
+              placeholder="請選擇"
+              [ngClass]="{ 'ng-dirty': formControlInvalid('DBSource') }"
+            ></p-dropdown>
+            <small class="p-error" *ngIf="showErrorMessage('DBSource')">
+              {{ showErrorMessage('DBSource') }}
+            </small>
+          </div>
+          <div class="col-12 md:col-2 lg:col-2">
+            <label for="BhNo" class="bpaas-required">分公司</label>
+            <p-dropdown
+              id="BhNo"
+              [options]="branchOptions"
+              formControlName="BhNo"
+              optionValue="value"
+              optionLabel="label"
+              placeholder="請選擇"
+              [showClear]="true"
+            ></p-dropdown>
+          </div>
+          <div class="col-12 md:col-2 lg:col-2">
+            <label for="Sdate">開始日期</label>
+            <p-calendar
+              [showIcon]="true"
+              appendTo="body"
+              dateFormat="yy/mm/dd"
+              dataType="string"
+              formControlName="Sdate"
+              [showOnFocus]="false"
+              id="Sdate"
+              [ngClass]="{ 'ng-dirty': formControlInvalid('Sdate') }"
+            >
+            </p-calendar>
+            <small *ngIf="formControlInvalid('Sdate')" class="p-error">
+              {{ showErrorMessage('Sdate') }}
+            </small>
+          </div>
+          <div class="col-12 md:col-2 lg:col-2">
+            <label for="Edate"> 結束日期 </label>
+            <p-calendar
+              [showIcon]="true"
+              appendTo="body"
+              dateFormat="yy/mm/dd"
+              dataType="string"
+              formControlName="Edate"
+              [showOnFocus]="false"
+              id="Edate"
+              [ngClass]="{ 'ng-dirty': formControlInvalid('Edate') }"
+            >
+            </p-calendar>
+            <small *ngIf="formControlInvalid('Edate')" class="p-error">
+              {{ showErrorMessage('Edate') }}
+            </small>
+          </div>
+        </div>
+        <div class="grid p-fluid">
+          <div class="col-12 md:col-4 lg:col-4">
+            <label for="Status">排程狀態</label>
+            <div class="flex">
+              <div class="flex align-items-center">
+                <p-radioButton
+                  formControlName="Status"
+                  value=""
+                  inputId="Status"
+                />
+                <label for="Status" class="mx-2">全部</label>
+              </div>
+              <div class="flex align-items-center">
+                <p-radioButton
+                  formControlName="Status"
+                  value="WAITING"
+                  inputId="Status"
+                />
+                <label for="Status" class="mx-2">WAIT</label>
+              </div>
+              <div class="flex align-items-center">
+                <p-radioButton
+                  formControlName="Status"
+                  value="RUNNING"
+                  inputId="Status"
+                />
+                <label for="Status" class="mx-2">RUNNING</label>
+              </div>
+              <div class="flex align-items-center">
+                <p-radioButton
+                  formControlName="Status"
+                  value="DONE"
+                  inputId="Status"
+                />
+                <label for="Status" class="mx-2">DONE</label>
+              </div>
+              <div class="flex align-items-center">
+                <p-radioButton
+                  formControlName="Status"
+                  value="FAIL"
+                  inputId="Status"
+                />
+                <label for="Status" class="mx-2">FAIL</label>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 md:col-4 lg:col-4">
+            <label for="IsCorrect">異常否</label>
+            <div class="flex">
+              <div class="flex align-items-center">
+                <p-radioButton
+                  formControlName="IsCorrect"
+                  value=""
+                  inputId="IsCorrect"
+                />
+                <label for="IsCorrect" class="mx-2">全部</label>
+              </div>
+              <div class="flex align-items-center">
+                <p-radioButton
+                  formControlName="IsCorrect"
+                  value="Y"
+                  inputId="IsCorrect"
+                />
+                <label for="IsCorrect" class="mx-2">正常</label>
+              </div>
+              <div class="flex align-items-center">
+                <p-radioButton
+                  formControlName="IsCorrect"
+                  value="N"
+                  inputId="IsCorrect"
+                />
+                <label for="IsCorrect" class="mx-2">異常</label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="grid p-fluid justify-content-end bpaas-button-row">
+          <div *ngIf="buttonList.query" class="col-12 md:col-3 lg:col-2">
+            <button
+              type="submit"
+              pButton
+              label="查詢"
+              (click)="doQuery()"
+            ></button>
+          </div>
+          <div *ngIf="buttonList.query" class="col-12 md:col-3 lg:col-2">
+            <button
+              type="button"
+              pButton
+              label="清除"
+              (click)="onClear()"
+              class="p-button-outlined mr-2"
+            ></button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </p-panel>
+  <p-panel [showHeader]="false">
+    <p-table
+      #dailyTasksReviewTable
+      [value]="tableData"
+      [columns]="tableColumns"
+      [paginator]="true"
+      [rows]="10"
+      [showCurrentPageReport]="true"
+      [rowsPerPageOptions]="[10, 15, 20]"
+      scrollHeight="50vh"
+      [scrollable]="true"
+      styleClass="p-datatable-gridlines p-datatable-sm p-datatable-striped"
+      [resizableColumns]="true"
+      currentPageReportTemplate="顯示第 {first} 至 {last} 筆，共 {totalRecords} 筆"
+    >
+      <ng-template pTemplate="header">
+        <tr id="bpaas-table-header">
+          <th scope="col">筆數</th>
+          <th
+            *ngFor="let column of tableColumns"
+            [pSortableColumn]="column.sortable ? column.field : ''"
+            [pSortableColumnDisabled]="column.sortable ? false : true"
+            [id]="'th-' + column.header"
+            pResizableColumn
+          >
+            {{ column.header }}
+            <p-sortIcon
+              *ngIf="column.sortable"
+              [field]="column.field"
+            ></p-sortIcon>
+          </th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-rowData let-columns="columns">
+        <tr [ngClass]="rowData.rowClass">
+          <td class="text">{{ rowData.serialNumber }}</td>
+          <td
+            *ngFor="let column of columns"
+            [class.bpaas-align-right]="column.numberField"
+          >
+            <ng-container *ngIf="column.field === 'BhNo'">
+              {{ getBranchDisplayName(rowData.BhNo) }}
+            </ng-container>
+            <ng-container *ngIf="column.field !== 'BhNo' && column.numberField">
+              {{
+                rowData[column.field] ??
+                  (column.numberFieldDefaultZero ? 0 : '') | dynamicDecimal
+              }}
+            </ng-container>
+            <ng-container
+              *ngIf="column.field !== 'BhNo' && !column.numberField"
+            >
+              {{ rowData[column.field] }}
+            </ng-container>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td [colSpan]="tableColumns.length + 1">沒有符合條件的資料</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-panel>
+</div>

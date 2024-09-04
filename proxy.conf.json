@@ -1,0 +1,49 @@
+{
+  "/APISERVER1": {
+    "target": "http://10.10.56.182",
+    "secure": false,
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/APISERVER1": ""
+    }
+  },
+  "/APISERVER2": {
+    "target": "http://10.10.56.182",
+    "secure": false,
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/APISERVER2": ""
+    }
+  },
+  "/Quote1": {
+    "target": "http://10.10.56.182:8080",
+    "secure": false,
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/Quote1": ""
+    }
+  },
+  "/Quote2": {
+    "target": "http://10.10.56.237:8080",
+    "secure": false,
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/Quote2": ""
+    }
+  },
+  "/api": {
+    "target": "http://10.10.56.182:6215",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/User": {
+    "target": "http://10.10.56.182:6215",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/LoginLog": {
+    "target": "http://10.10.56.182:6215",
+    "secure": false,
+    "changeOrigin": true
+  }
+}

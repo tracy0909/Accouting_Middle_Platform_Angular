@@ -1,0 +1,352 @@
+<div class="mt-3">
+  <p-panel [header]="titleName" [toggleable]="true">
+    <form [formGroup]="formGroup">
+      <div class="grid p-fluid">
+        <div class="col-12 md:col-2 lg:col-2">
+          <label for="APISERVER" class="bpaas-required">查詢帳中API主機</label>
+          <p-dropdown
+            id="APISERVER"
+            [options]="options"
+            formControlName="APISERVER"
+            optionValue="value"
+            optionLabel="label"
+            placeholder="請選擇"
+            [ngClass]="{ 'ng-dirty': formControlInvalid('APISERVER') }"
+          >
+          </p-dropdown>
+          <div *ngIf="formControlInvalid('APISERVER')">
+            <small
+              class="p-error"
+              *ngIf="formControl('APISERVER').errors?.['required']"
+            >
+              此欄位必須輸入
+            </small>
+          </div>
+        </div>
+        <div class="col-12 md:col-2 lg:col-2">
+          <label for="bhno" class="bpaas-required">分公司</label>
+          <p-dropdown
+            id="bhno"
+            [options]="branchOptions"
+            formControlName="bhno"
+            optionValue="value"
+            optionLabel="label"
+            placeholder="請選擇"
+            [ngClass]="{ 'ng-dirty': formControlInvalid('bhno') }"
+          >
+          </p-dropdown>
+          <div *ngIf="formControlInvalid('bhno')">
+            <small
+              class="p-error"
+              *ngIf="formControl('bhno').errors?.['required']"
+            >
+              此欄位必須輸入
+            </small>
+          </div>
+        </div>
+        <div class="col-12 md:col-2 lg:col-2">
+          <label for="cseq" class="bpaas-required">客戶帳號</label>
+          <input
+            type="text"
+            id="cseq"
+            pInputText
+            formControlName="cseq"
+            maxlength="7"
+            [ngClass]="{ 'ng-dirty': formControlInvalid('cseq') }"
+          />
+          <small *ngIf="formGroup.controls['cseq']?.touched" class="p-error">
+            {{ showErrorMessage("cseq") }}
+          </small>
+        </div>
+        <div class="col-12 md:col-4 lg:col-4">
+          <app-stock-suggestions
+            [stockControl]="stockControl"
+            [stockNameControl]="stockNameControl"
+          ></app-stock-suggestions>
+        </div>
+      </div>
+      <div class="grid p-fluid">
+        <div class="col-12 md:col-2 lg:col-2">
+          <label for="bdate">起始日期</label>
+          <p-calendar
+            [showIcon]="true"
+            appendTo="body"
+            dateFormat="yy/mm/dd"
+            dataType="string"
+            formControlName="bdate"
+            [showOnFocus]="false"
+            id="bdate"
+          >
+          </p-calendar>
+        </div>
+        <div class="col-12 md:col-2 lg:col-2">
+          <label for="edate">
+            結束日期
+            <i
+              class="pi pi-question-circle ml-2"
+              pTooltip="請輸入日期格式如2022/01/01，預設查詢區間近3個月"
+              tooltipPosition="right"
+            ></i>
+          </label>
+          <p-calendar
+            [showIcon]="true"
+            appendTo="body"
+            dateFormat="yy/mm/dd"
+            dataType="string"
+            formControlName="edate"
+            [showOnFocus]="false"
+            id="edate"
+          >
+          </p-calendar>
+        </div>
+      </div>
+      <div class="grid p-fluid justify-content-end bpaas-button-row">
+        <div *ngIf="buttonList.query" class="col-12 md:col-3 lg:col-2">
+          <button
+            type="submit"
+            pButton
+            label="查詢"
+            (click)="onSearch()"
+          ></button>
+        </div>
+        <div *ngIf="buttonList.query" class="col-12 md:col-3 lg:col-2">
+          <button
+            type="button"
+            pButton
+            label="清除"
+            class="p-button-outlined mr-2"
+            (click)="onClearForm()"
+          ></button>
+        </div>
+      </div>
+    </form>
+  </p-panel>
+
+  <div class="flex justify-content-between mb-3 align-items-center">
+    <div *ngIf="queryTime">資料查詢時間：{{ queryTime }}</div>
+    <!-- <div *ngIf="hasSearched && buttonList.download" class="text-right">
+      <button
+        pButton
+        type="button"
+        label="匯出 Excel"
+        icon="pi pi-file-excel"
+        (click)="doExportToExcel()"
+      ></button>
+    </div> -->
+  </div>
+
+  <div class="pb-2">
+    <p-panel [showHeader]="false">
+      <p-table
+        #tableSumComponent
+        [value]="FilterData"
+        [totalRecords]="FilterData.length"
+        [columns]="profileSumTableColumns"
+        [paginator]="true"
+        [rows]="10"
+        [showCurrentPageReport]="true"
+        [rowsPerPageOptions]="[10, 15, 20]"
+        scrollHeight="50vh"
+        [scrollable]="true"
+        currentPageReportTemplate="顯示第 {first} 至 {last} 筆，共 {totalRecords} 筆"
+        styleClass="p-datatable-gridlines p-datatable-sm p-datatable-striped"
+        [resizableColumns]="true"
+        dataKey="no"
+        [expandedRowKeys]="expendRows"
+      >
+        <ng-template pTemplate="header" let-columns>
+          <tr id="bpaas-table-header">
+            <th
+              *ngFor="let column of columns"
+              [pSortableColumn]="column.sortable ? column.field : ''"
+              [pSortableColumnDisabled]="
+                column.sortable && column.field !== 'no' ? false : true
+              "
+              scope="col"
+              pResizableColumn
+            >
+              <label for="{{ column.field }}">
+                {{ column.header }}
+              </label>
+              <p-sortIcon
+                *ngIf="column.sortable && column.field !== 'no'"
+                [field]="column.field"
+              ></p-sortIcon>
+            </th>
+          </tr>
+        </ng-template>
+        <ng-template
+          pTemplate="body"
+          let-rowData
+          let-rowIndex="rowIndex"
+          let-columns="columns"
+          let-expanded="expanded"
+        >
+          <tr
+            [pRowToggler]="rowData"
+            style="cursor: pointer"
+            (click)="
+              onProfileDetailClick(rowData.profile_details.profile_detail)
+            "
+          >
+            <td
+              *ngFor="let column of columns"
+              [class.bpaas-align-right]="column.numberField"
+            >
+              <ng-container *ngIf="column.field === 'no'; else otherFields">
+                {{ rowData[column.field] }}
+                <i
+                  class="pi p-datatable-row-icon"
+                  [ngClass]="expanded ? 'pi-chevron-down' : 'pi-chevron-right'"
+                ></i>
+              </ng-container>
+              <ng-template #otherFields>
+                <ng-container *ngIf="column.numberField">
+                  {{
+                    rowData[column.field] ??
+                      (column.numberFieldDefaultZero ? 0 : "") | dynamicDecimal
+                  }}
+                </ng-container>
+                <ng-container *ngIf="!column.numberField">
+                  {{ rowData[column.field] }}
+                </ng-container>
+              </ng-template>
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="rowexpansion" let-rowData>
+          <tr>
+            <td colspan="20">
+              <p-table
+                [value]="
+                  onProfileDetailClick(rowData.profile_details.profile_detail)
+                "
+                dataKey="no"
+              >
+                <ng-template pTemplate="header" let-columns>
+                  <tr id="bpaas-table-header">
+                    <th
+                      *ngFor="let column of profileDetailTableColumns"
+                      [pSortableColumn]="column.sortable ? column.field : ''"
+                      [pSortableColumnDisabled]="
+                        onProfileDetailClick(
+                          rowData.profile_details.profile_detail
+                        ).length > 1
+                          ? false
+                          : true
+                      "
+                      scope="col"
+                      pResizableColumn
+                    >
+                      <label for="{{ column.field }}">
+                        {{ column.header }}
+                      </label>
+                      <p-sortIcon
+                        *ngIf="
+                          onProfileDetailClick(
+                            rowData.profile_details.profile_detail
+                          ).length > 1
+                        "
+                        [field]="column.field"
+                      ></p-sortIcon>
+                    </th>
+                  </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-detailRowData>
+                  <tr>
+                    <td
+                      *ngFor="let column of profileDetailTableColumns"
+                      [class.bpaas-align-right]="column.numberField"
+                    >
+                      <ng-container *ngIf="column.numberField">
+                        {{
+                          detailRowData[column.field] ??
+                            (column.numberFieldDefaultZero ? 0 : "")
+                            | dynamicDecimal
+                        }}
+                      </ng-container>
+                      <ng-container *ngIf="column.dateField">
+                        {{ getDetailDate(detailRowData[column.field]) }}
+                      </ng-container>
+                      <ng-container
+                        *ngIf="!column.numberField && !column.dateField"
+                      >
+                        {{ detailRowData[column.field] }}
+                      </ng-container>
+                    </td>
+                  </tr>
+                </ng-template>
+              </p-table>
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td [colSpan]="profileDetailTableColumns.length + 2">
+              沒有符合條件的資料
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </p-panel>
+  </div>
+</div>
+
+<p-panel [header]="totalName" [toggleable]="true">
+  <p-table
+    [value]="FilterTotalData"
+    [columns]="totalTableColumns"
+    [totalRecords]="FilterData.length"
+    scrollHeight="50vh"
+    [scrollable]="true"
+    styleClass="p-datatable-gridlines p-datatable-sm p-datatable-striped "
+    [resizableColumns]="true"
+  >
+    <ng-template pTemplate="header" let-columns>
+      <tr id="bpaas-table-header">
+        <th
+          *ngFor="let column of columns"
+          [pSortableColumn]="column.sortable ? column.field : ''"
+          [pSortableColumnDisabled]="column.sortable ? false : true"
+          scope="col"
+          pResizableColumn
+        >
+          <label for="{{ column.field }}">
+            {{ column.header }}
+          </label>
+          <p-sortIcon
+            *ngIf="column.sortable"
+            [field]="column.field"
+          ></p-sortIcon>
+        </th>
+      </tr>
+    </ng-template>
+    <ng-template
+      pTemplate="body"
+      let-rowData
+      let-rowIndex="rowIndex"
+      let-columns="columns"
+    >
+      <tr>
+        <td
+          *ngFor="let column of columns"
+          [class.bpaas-align-right]="column.numberField"
+        >
+          <ng-container *ngIf="column.numberField">
+            {{
+              rowData[column.field] ?? (column.numberFieldDefaultZero ? 0 : "")
+                | dynamicDecimal
+            }}
+          </ng-container>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td [colSpan]="totalTableColumns.length + 2">沒有符合條件的資料</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</p-panel>

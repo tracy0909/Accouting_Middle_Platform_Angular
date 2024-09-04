@@ -1,0 +1,230 @@
+<div class="flex justify-content-between mt-3 align-items-center">
+  <div *ngIf="queryTime">資料查詢時間：{{ queryTime }}</div>
+</div>
+<div class="mt-3">
+  <p-panel [header]="systemMarketStatusTableName" [toggleable]="true">
+    <p-table
+      #systemMarketStatusTable
+      [value]="systemMarketStatusTableData"
+      [columns]="systemMarketStatusTableColumns"
+      [paginator]="true"
+      [rows]="10"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="顯示第 {first} 至 {last} 筆，共 {totalRecords} 筆"
+      [rowsPerPageOptions]="[10, 15, 20]"
+      scrollHeight="75vh"
+      [scrollable]="true"
+      [resizableColumns]="true"
+      styleClass="p-datatable-gridlines p-datatable-sm p-datatable-striped"
+    >
+      <ng-template pTemplate="header">
+        <tr id="bpaas-table-header">
+          <th
+            *ngFor="let column of systemMarketStatusTableColumns"
+            [pSortableColumn]="column.sortable ? column.field : ''"
+            [pSortableColumnDisabled]="
+              column.sortable && column.field !== 'no' ? false : true
+            "
+            scope="col"
+            pResizableColumn
+            [id]="column.field"
+          >
+            {{ column.header }}
+            <p-sortIcon
+              *ngIf="column.sortable && column.field !== 'no'"
+              [field]="column.field"
+            ></p-sortIcon>
+          </th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-rowData let-columns="columns">
+        <tr>
+          <td
+            *ngFor="let column of columns"
+            [class.bpaas-align-right]="column.numberField"
+          >
+            <ng-container *ngIf="column.numberField">
+              {{
+                rowData[column.field] ??
+                  (column.numberFieldDefaultZero ? 0 : '') | dynamicDecimal
+              }}
+            </ng-container>
+            <ng-container *ngIf="!column.numberField">
+              {{ rowData[column.field] }}
+            </ng-container>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td [colSpan]="systemMarketStatusTableColumns.length + 1">
+            沒有符合條件的資料
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-panel>
+  <p-panel [header]="diskStatusOfServerTableName" [toggleable]="true">
+    <p-table
+      #diskStatusOfServerTable
+      [value]="diskStatusOfServerTableData"
+      [columns]="diskStatusOfServerTableColumns"
+      [paginator]="true"
+      [rows]="10"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="顯示第 {first} 至 {last} 筆，共 {totalRecords} 筆"
+      [rowsPerPageOptions]="[10, 15, 20]"
+      scrollHeight="50vh"
+      [scrollable]="true"
+      [resizableColumns]="true"
+      styleClass="p-datatable-gridlines p-datatable-sm p-datatable-striped"
+      rowGroupMode="rowspan"
+      groupRowsBy="DBName"
+      sortField="DBName"
+      sortMode="single"
+    >
+      <ng-template pTemplate="header">
+        <tr id="bpaas-table-header">
+          <th
+            *ngFor="let column of diskStatusOfServerTableColumns"
+            [pSortableColumn]="column.sortable ? column.field : ''"
+            [pSortableColumnDisabled]="
+              column.sortable && column.field !== 'no' ? false : true
+            "
+            scope="col"
+            pResizableColumn
+            [id]="column.field"
+          >
+            {{ column.header }}
+            <p-sortIcon
+              *ngIf="column.sortable && column.field !== 'no'"
+              [field]="column.field"
+            ></p-sortIcon>
+          </th>
+        </tr>
+      </ng-template>
+      <ng-template
+        pTemplate="body"
+        let-rowData
+        let-columns="columns"
+        let-rowgroup="rowgroup"
+        let-rowspan="rowspan"
+      >
+        <tr>
+          <td *ngIf="rowgroup" [attr.rowspan]="rowspan">
+            {{ rowData.DBName }}
+          </td>
+          <td *ngIf="rowgroup" [attr.rowspan]="rowspan">{{ rowData.DBIp }}</td>
+          <td>
+            {{ rowData.HostName }}
+          </td>
+          <td>
+            {{ rowData.DiskName }}
+          </td>
+          <td>
+            {{ rowData.DiskCapacity }}
+          </td>
+          <td>
+            {{ rowData.DiskUsedSpace }}
+          </td>
+          <td>
+            {{ rowData.DiskUsage }}
+          </td>
+          <td>
+            {{ rowData.IsSecure }}
+          </td>
+          <td>
+            {{ rowData.ModDate }}
+          </td>
+          <td>
+            {{ rowData.ModTime }}
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td [colSpan]="diskStatusOfServerTableColumns.length + 1">
+            沒有符合條件的資料
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-panel>
+  <p-panel [header]="diskStatusOfAPTableName" [toggleable]="true">
+    <p-table
+      #diskStatusOfAPTable
+      [value]="diskStatusOfAPTableData"
+      [columns]="diskStatusOfAPTableColumns"
+      [paginator]="true"
+      [rows]="10"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="顯示第 {first} 至 {last} 筆，共 {totalRecords} 筆"
+      [rowsPerPageOptions]="[10, 15, 20]"
+      scrollHeight="75vh"
+      [scrollable]="true"
+      [resizableColumns]="true"
+      styleClass="p-datatable-gridlines p-datatable-sm p-datatable-striped"
+      rowGroupMode="rowspan"
+      groupRowsBy="DBName"
+      sortField="DBName"
+      sortMode="single"
+    >
+      <ng-template pTemplate="header">
+        <tr id="bpaas-table-header">
+          <th
+            *ngFor="let column of diskStatusOfAPTableColumns"
+            [pSortableColumn]="column.sortable ? column.field : ''"
+            [pSortableColumnDisabled]="
+              column.sortable && column.field !== 'no' ? false : true
+            "
+            scope="col"
+            pResizableColumn
+            [id]="column.field"
+          >
+            {{ column.header }}
+            <p-sortIcon
+              *ngIf="column.sortable && column.field !== 'no'"
+              [field]="column.field"
+            ></p-sortIcon>
+          </th>
+        </tr>
+      </ng-template>
+      <ng-template
+        pTemplate="body"
+        let-rowData
+        let-columns="columns"
+        let-rowgroup="rowgroup"
+        let-rowspan="rowspan"
+      >
+        <tr>
+          <td *ngIf="rowgroup" [attr.rowspan]="rowspan">
+            {{ rowData.DBName }}
+          </td>
+          <td *ngIf="rowgroup" [attr.rowspan]="rowspan">{{ rowData.DBIp }}</td>
+          <td>
+            {{ rowData.AppName }}
+          </td>
+          <td>
+            {{ rowData.AppPath }}
+          </td>
+          <td>
+            {{ rowData.ProcessStatus }}
+          </td>
+          <td>
+            {{ rowData.ModDate }}
+          </td>
+          <td>
+            {{ rowData.ModTime }}
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td [colSpan]="diskStatusOfAPTableColumns.length + 1">
+            沒有符合條件的資料
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-panel>
+</div>

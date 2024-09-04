@@ -1,0 +1,152 @@
+<div class="mt-3">
+  <p-panel [header]="titleName" [toggleable]="true">
+    <form [formGroup]="formGroup">
+      <div class="grid p-fluid">
+        <div class="col-12 md:col-2 lg:col-2">
+          <label for="TDate"> 日期 </label>
+          <p-calendar
+            [showIcon]="true"
+            appendTo="body"
+            dateFormat="yy/mm/dd"
+            dataType="string"
+            formControlName="TDate"
+            [showOnFocus]="false"
+            id="TDate"
+          >
+          </p-calendar>
+          <small *ngIf="formGroup.controls['TDate']?.touched" class="p-error">
+            {{ showErrorMessage('TDate') }}
+          </small>
+        </div>
+        <div class="col-12 md:col-2 lg:col-2">
+          <label for="bhno">分公司</label>
+          <p-dropdown
+            id="bhno"
+            [options]="branchOptions"
+            formControlName="bhno"
+            optionValue="value"
+            optionLabel="label"
+            placeholder="請選擇"
+            [showClear]="true"
+            [ngClass]="{ 'ng-dirty': formControlInvalid('bhno') }"
+          >
+          </p-dropdown>
+          <div *ngIf="formControlInvalid('bhno')">
+            <small
+              class="p-error"
+              *ngIf="formControl('bhno').errors?.['required']"
+            >
+              此欄位必須輸入
+            </small>
+          </div>
+        </div>
+        <div class="col-12 md:col-2 lg:col-2">
+          <label for="Status">狀態</label>
+          <p-dropdown
+            id="Status"
+            [options]="statusOptions"
+            formControlName="Status"
+            optionValue="value"
+            optionLabel="label"
+            placeholder="請選擇"
+            [ngClass]="{ 'ng-dirty': formControlInvalid('Status') }"
+          >
+          </p-dropdown>
+          <div *ngIf="formControlInvalid('Status')">
+            <small
+              class="p-error"
+              *ngIf="formControl('Status').errors?.['required']"
+            >
+              此欄位必須輸入
+            </small>
+          </div>
+        </div>
+      </div>
+      <div class="grid p-fluid justify-content-end bpaas-button-row">
+        <div *ngIf="buttonList.query" class="col-12 md:col-3 lg:col-2">
+          <button
+            type="submit"
+            pButton
+            label="查詢"
+            (click)="onSearch()"
+          ></button>
+        </div>
+        <div *ngIf="buttonList.query" class="col-12 md:col-3 lg:col-2">
+          <button
+            type="button"
+            pButton
+            label="清除"
+            class="p-button-outlined mr-2"
+            (click)="onClearForm()"
+          ></button>
+        </div>
+      </div>
+    </form>
+  </p-panel>
+  <div class="flex justify-content-between mb-3 align-items-center">
+    <div *ngIf="queryTime">資料查詢時間：{{ queryTime }}</div>
+  </div>
+  <div *ngIf="queryTime">
+    <p-panel [showHeader]="false">
+      <div *ngFor="let key of objectKeys">
+        <p-table
+          #tableCopmonent
+          [value]="checkSum[key]"
+          [columns]="tableColumns"
+          styleClass="p-datatable-gridlines p-datatable-sm p-datatable-striped"
+        >
+          <ng-template pTemplate="header">
+            <tr id="bpaas-table-header">
+              <th
+                *ngFor="let column of tableColumns"
+                [pSortableColumn]="column.sortable ? column.field : ''"
+                [pSortableColumnDisabled]="
+                  column.sortable && column.field !== 'no' ? false : true
+                "
+                [id]="'th-' + column.header"
+                pResizableColumn
+              >
+                {{ column.header }}
+                <p-sortIcon
+                  *ngIf="column.sortable && column.field !== 'no'"
+                  [field]="column.field"
+                ></p-sortIcon>
+              </th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-offer let-rowIndex="rowIndex">
+            <tr
+              [ngClass]="{
+                'highlight-red': !offer.isNormal,
+                'highlight-pink':
+                  (offer.category === AfterMarketDatabaseCountEnum.DETAIL ||
+                    offer.category === AfterMarketDatabaseCountEnum.BALANCE) &&
+                  !offer.isNormal
+              }"
+            >
+              <td *ngFor="let header of tableColumns">
+                <ng-container *ngIf="header.numberField">
+                  {{
+                    offer[header.field] ??
+                      (header.numberFieldDefaultZero ? 0 : '') | dynamicDecimal
+                  }}
+                </ng-container>
+                <ng-container *ngIf="!header.numberField">
+                  {{ offer[header.field] }}
+                </ng-container>
+                <ng-container *ngIf="!header.field">
+                  {{ rowIndex + 1 }}</ng-container
+                >
+              </td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td [colSpan]="tableColumns.length + 1">沒有符合條件的資料</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+    </p-panel>
+  </div>
+</div>

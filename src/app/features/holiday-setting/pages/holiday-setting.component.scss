@@ -1,0 +1,120 @@
+@import '../../../../styles/variables';
+
+// 交易日
+.status-active {
+  border: 1px solid $secondaryLight;
+  padding: 3px 6px 3px 6px;
+  border-radius: 3px;
+}
+
+// 不交易日
+.status-disabled {
+  background-color: $activeColor;
+  color: $white;
+  padding: 3px 6px 3px 6px;
+  border-radius: 3px;
+}
+
+// 今日
+.status-today {
+  background-color: $gold;
+  border: 2px solid $primaryColor;
+  color: $white;
+  padding: 3px 6px 3px 6px;
+  border-radius: 3px;
+}
+
+// 客製化日曆表頭樣式
+.custom-calendar-header {
+  color: $white;
+  background-color: $primaryColor;
+  margin: 0px;
+  padding: 8px;
+}
+
+// ::ng-deep
+//   .holiday-setting-container
+//   .p-tabview
+//   .p-tabview-nav
+//   li.p-highlight
+//   .p-tabview-nav-link {
+//   background-color: $activeColor;
+//   color: $white;
+// }
+
+// 日曆的內距可自行調整
+::ng-deep .holiday-setting-container .p-datepicker {
+  padding: 0px;
+}
+/* 隱藏 Calendar 元件的月份導航部分 */
+// 使用 Angular 特殊的深度選擇器
+::ng-deep .holiday-setting-container .p-datepicker-header {
+  display: none;
+}
+
+::ng-deep .holiday-setting-container .p-calendar {
+  width: 100%;
+  min-height: 302px;
+}
+
+// 當天日期顏色
+:host ::ng-deep .holiday-setting-container {
+  .p-calendar {
+    .p-datepicker {
+      .p-datepicker-calendar {
+        td {
+          &.p-datepicker-today > span {
+            background-color: $gold;
+            border: 1px solid $primaryColor;
+            color: $white;
+            &.p-highlight {
+              background-color: $activeColor;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+:host ::ng-deep .holiday-setting-container {
+  .p-calendar {
+    .p-datepicker {
+      .p-datepicker-calendar {
+        // 增加表格單元格的間距
+        border-collapse: separate;
+        border-spacing: 3px;
+
+        th {
+          // 調整表頭的 padding
+          padding: 0.5rem;
+        }
+
+        td {
+          padding: 0;
+
+          & > span {
+            // 增加日期元素的大小
+            width: 2.5rem;
+            height: 2.5rem;
+            // 增大字體大小
+            font-size: 1.2rem;
+            // 使用 flex 布局來居中文字
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+        }
+      }
+    }
+  }
+}
+
+.custom-position-relative {
+  position: relative;
+  .save-btn {
+    position: absolute;
+    right: 13px;
+    z-index: 999;
+  }
+}

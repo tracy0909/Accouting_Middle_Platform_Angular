@@ -1,0 +1,150 @@
+<div class="holiday-setting-container">
+  <div class="mt-3">
+    <!-- 系統參數設定面板 -->
+    <p-panel [header]="titleName" [toggleable]="true">
+      <div class="grid p-fluid">
+        <div class="col-12 md:col-6 lg:col-6">
+          <!-- 選資料庫 -->
+          <form [formGroup]="holidayForm" class="flex">
+            <div class="col-12 md:col-6 lg:col-6">
+              <label for="DBSource" class="bpaas-required">資料庫別</label>
+              <p-dropdown
+                id="DBSource"
+                formControlName="DBSource"
+                [options]="dbSourcesOptions"
+                optionValue="value"
+                optionLabel="label"
+                placeholder="請選擇"
+              >
+              </p-dropdown>
+            </div>
+            <!-- 選年份 -->
+            <div class="col-12 md:col-6 lg:col-6">
+              <label for="Year" class="bpaas-required">年份</label>
+              <p-dropdown
+                id="year"
+                [options]="years"
+                formControlName="year"
+                placeholder="Select a Year"
+                optionLabel="year"
+                optionValue="year"
+              />
+            </div>
+          </form>
+        </div>
+      </div>
+      <div class="grid p-fluid justify-content-end bpaas-button-row">
+        <div *ngIf="buttonList.query" class="col-12 md:col-2 lg:col-2">
+          <!-- 查詢按鈕 -->
+          <button
+            type="button"
+            pButton
+            label="查詢"
+            (click)="onSearch()"
+            class="mr-2"
+          ></button>
+        </div>
+        <div *ngIf="buttonList.query" class="col-12 md:col-2 lg:col-2">
+          <!-- 重設按鈕 -->
+          <button
+            type="button"
+            pButton
+            label="清除"
+            class="p-button-outlined"
+            (click)="onReset()"
+          ></button>
+        </div>
+      </div>
+    </p-panel>
+  </div>
+  <div *ngIf="queryTime" class="mb-3">資料查詢時間：{{ queryTime }}</div>
+  <!-- 顯示表格和選單列的面板 -->
+  <div
+    class="custom-position-relative"
+    *ngIf="showPanel && buttonList.query && queryTime"
+  >
+    <p-panel [showHeader]="false">
+      <div class="save-btn" *ngIf="buttonList.update">
+        <p-button label="儲存" (click)="onSave()" icon="pi pi-save"></p-button>
+      </div>
+
+      <!-- TabView 元件 -->
+      <p-tabView
+        (onChange)="onTabChange($event)"
+        [(activeIndex)]="activeIndex"
+        #calendar
+      >
+        <p-tabPanel header="交易放假日設定" leftIcon="pi pi-calendar">
+          <div class="container">
+            <!-- 交易放假日設定的內容 -->
+            <div class="flex justify-content-between align-item-center">
+              <ul class="flex p-reset col-12">
+                <li class="mr-2 status-disabled">不交易</li>
+                <li class="mr-2 status-active">要交易</li>
+                <li class="status-today">今日</li>
+              </ul>
+            </div>
+            <div class="grid justify-content-between flex-wrap">
+              <div
+                *ngFor="let startDate of monthStartDates; let i = index"
+                class="col-12 md:col-4 lg:col-3"
+              >
+                <p-calendar
+                  [(ngModel)]="selectedDates[i]"
+                  selectionMode="multiple"
+                  [inline]="true"
+                  [numberOfMonths]="1"
+                  [showOtherMonths]="false"
+                >
+                  <ng-template pTemplate="header">
+                    <h3 class="text-center custom-calendar-header">
+                      {{ startDate | date : "yyyy年MM月" }}
+                    </h3>
+                  </ng-template>
+                </p-calendar>
+              </div>
+            </div>
+          </div>
+        </p-tabPanel>
+        <p-tabPanel header="交割放假日設定" leftIcon="pi pi-calendar-times">
+          <div class="container">
+            <!-- 交割放假日設定的內容 -->
+            <div class="flex justify-content-between align-item-center">
+              <ul class="flex p-reset col-12">
+                <li class="mr-2 status-disabled">不結帳</li>
+                <li class="mr-2 status-active">要結帳</li>
+                <li class="status-today">今日</li>
+              </ul>
+              <p-button
+                label="儲存"
+                class="col-6 text-right"
+                (click)="onSave()"
+                (keydown)="onSave()"
+              ></p-button>
+            </div>
+            <div class="grid flex-wrap">
+              <div
+                *ngFor="let startDate of monthStartDates; let i = index"
+                class="col-12 md:col-4 lg:col-3"
+              >
+                <p-calendar
+                  [(ngModel)]="deliveryselectedDates[i]"
+                  selectionMode="multiple"
+                  [inline]="true"
+                  [numberOfMonths]="1"
+                  [showOtherMonths]="false"
+                >
+                  <ng-template pTemplate="header">
+                    <h3 class="text-center custom-calendar-header">
+                      {{ startDate | date : "yyyy年MM月" }}
+                    </h3>
+                  </ng-template>
+                </p-calendar>
+              </div>
+            </div>
+          </div>
+        </p-tabPanel>
+      </p-tabView>
+    </p-panel>
+  </div>
+</div>

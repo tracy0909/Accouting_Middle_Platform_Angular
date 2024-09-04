@@ -1,0 +1,31 @@
+/* You can add global styles to this file, and also import other style files */
+@layer primeng {
+  @import "./styles/variables";
+  @import "./styles/main";
+  @import "./styles/forms";
+  @import "./styles/table";
+  @import "./styles/toast";
+  @import "./styles/panel";
+  @import "./styles/card";
+  @import "./styles/dialog";
+  @import "./styles/tabview";
+  @import "./styles/multiselect";
+  @import "./styles/autocomplete";
+  @import "./styles/tree";
+  @import "./styles/selectbutton";
+  @import "./styles/calendar";
+  @import "./styles/menubar";
+  @import "./styles/tabmenu";
+  @import "./styles/dropdown";
+  @import "./styles/inputnumber";
+  @import "./styles/scrolltop.scss";
+  @import "./styles/menu.scss";
+  @import "./styles/checkbox.scss";
+  @import "./styles/fieldset.scss";
+  @import "./styles/inputswitch";
+  //新增永豐金變數
+  @import "./styles/button";
+  @import "./styles/inputtext";
+  @import "./styles/inputcalendar";
+  @import "./styles/fileupload";
+}

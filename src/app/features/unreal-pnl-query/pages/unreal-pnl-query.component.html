@@ -1,0 +1,447 @@
+<div class="mt-3">
+  <form [formGroup]="formGroup">
+    <p-panel [header]="titleName" [toggleable]="true">
+      <div class="card">
+        <div class="grid p-fluid">
+          <div class="col-12 md:col-2 lg:col-2">
+            <label for="APISERVER" class="bpaas-required"
+              >查詢帳中API主機</label
+            >
+            <p-dropdown
+              id="APISERVER"
+              [options]="apiServerOptions"
+              formControlName="APISERVER"
+              optionValue="value"
+              optionLabel="label"
+              placeholder="請選擇"
+              [ngClass]="{ 'ng-dirty': formControlInvalid('APISERVER') }"
+            ></p-dropdown>
+            <small *ngIf="formControlInvalid('APISERVER')" class="p-error">
+              {{ showErrorMessage('APISERVER') }}
+            </small>
+          </div>
+          <div class="col-12 md:col-2 lg:col-2">
+            <label for="bhno" class="bpaas-required">分公司</label>
+            <p-dropdown
+              id="bhno"
+              [options]="branchOptions"
+              formControlName="bhno"
+              optionValue="value"
+              optionLabel="label"
+              placeholder="請選擇"
+              [ngClass]="{ 'ng-dirty': formControlInvalid('bhno') }"
+            ></p-dropdown>
+            <small *ngIf="formControlInvalid('bhno')" class="p-error">
+              {{ showErrorMessage('bhno') }}
+            </small>
+          </div>
+          <div class="col-12 md:col-2 lg:col-2">
+            <label for="cseq" class="bpaas-required">帳號</label>
+            <input
+              id="cseq"
+              pInputText
+              type="text"
+              formControlName="cseq"
+              [ngClass]="{ 'ng-dirty': formControlInvalid('cseq') }"
+            />
+            <small *ngIf="formControlInvalid('cseq')" class="p-error">
+              {{ showErrorMessage('cseq') }}
+            </small>
+          </div>
+          <div class="col-12 md:col-4 lg:col-4">
+            <app-stock-suggestions
+              [stockControl]="stockControl"
+              [stockNameControl]="stockNameControl"
+            ></app-stock-suggestions>
+          </div>
+          <div class="col-12 md:col-2 lg:col-2">
+            <label for="ttype">庫存類別</label>
+            <p-dropdown
+              id="ttype"
+              [options]="ttypeOptions"
+              formControlName="ttype"
+              optionValue="value"
+              optionLabel="label"
+              placeholder="請選擇"
+              [ngClass]="{ 'ng-dirty': formControlInvalid('ttype') }"
+            ></p-dropdown>
+            <small *ngIf="formControlInvalid('ttype')" class="p-error">
+              {{ showErrorMessage('ttype') }}
+            </small>
+          </div>
+        </div>
+        <div class="grid p-fluid">
+          <div class="col-12 md:col-2 lg:col-2">
+            <label for="ctype">幣別</label>
+            <p-dropdown
+              id="ctype"
+              [options]="currencOptions"
+              formControlName="ctype"
+              optionValue="value"
+              optionLabel="label"
+              placeholder="請選擇"
+              [ngClass]="{ 'ng-dirty': formControlInvalid('ctype') }"
+            ></p-dropdown>
+            <small *ngIf="formControlInvalid('ctype')" class="p-error">
+              {{ showErrorMessage('ctype') }}
+            </small>
+          </div>
+          <div class="grid col-12 md:col-4 lg:col-4 flex align-items-end">
+            <div class="col-12 md:col-6 lg:col-6">
+              <label class="mr-2" for="exchangeRate">參考匯率</label>
+              <p-dropdown
+                [options]="exchangeRateOptions"
+                optionLabel="label"
+                formControlName="exchangeRate"
+              />
+            </div>
+            <div class="mb-2">
+              <label for="redInfo"></label>
+              <div class="red-text">{{ redInfo }}</div>
+            </div>
+          </div>
+        </div>
+        <div class="grid p-fluid">
+          <div class="col-12 md:col-2 lg:col-2">
+            <div class="flex align-items-center">
+              <p-checkbox
+                [binary]="true"
+                inputId="binary"
+                formControlName="action1"
+              />
+              <label for="action1">濾除下市股票</label>
+            </div>
+          </div>
+          <div class="col-12 md:col-2 lg:col-2">
+            <div class="flex align-items-center">
+              <p-checkbox
+                [binary]="true"
+                inputId="binary"
+                formControlName="action2"
+              />
+              <label for="action2">不含稅費</label>
+            </div>
+          </div>
+          <div class="col-12 md:col-2 lg:col-2">
+            <div class="flex align-items-center">
+              <p-checkbox
+                [binary]="true"
+                inputId="binary"
+                formControlName="action4"
+              />
+              <label for="action4">不計除息金</label>
+            </div>
+          </div>
+          <div class="col-12 md:col-2 lg:col-2">
+            <div class="flex align-items-center">
+              <p-checkbox
+                [binary]="true"
+                inputId="binary"
+                formControlName="action8"
+              />
+              <label for="action8">顯示損益兩平</label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="grid p-fluid justify-content-end bpaas-button-row">
+        <div class="flex align-items-center w-full">
+          <div class="col-12 md:col-3 lg:col-2 mr-auto">
+            日結狀態：{{
+              rootTableData.length > 0 ? rootTableData[0].settle_status : ''
+            }}
+          </div>
+          <span class="link-url my-auto mr-2" (click)="showDialog()"
+            >計算方式</span
+          >
+          <div *ngIf="buttonList.query" class="col-12 md:col-3 lg:col-2">
+            <button
+              type="button"
+              pButton
+              label="查詢"
+              (click)="doQuery()"
+            ></button>
+          </div>
+          <div *ngIf="buttonList.query" class="col-12 md:col-3 lg:col-2">
+            <button
+              type="button"
+              pButton
+              label="清除"
+              class="p-button-outlined mr-2"
+              (click)="onClear()"
+            ></button>
+          </div>
+        </div>
+      </div>
+    </p-panel>
+  </form>
+</div>
+<div class="flex justify-content-between mb-3 align-items-center">
+  <div *ngIf="queryTime">資料查詢時間：{{ queryTime }}</div>
+  <!-- <div *ngIf="hasSearched && buttonList.download" class="text-right">
+    <button
+      pButton
+      type="button"
+      label="匯出 Excel"
+      icon="pi pi-file-excel"
+      (click)="doExportToExcel()"
+    ></button>
+  </div> -->
+</div>
+<div class="mt-3">
+  <p-panel [showHeader]="false" [toggleable]="true">
+    <p-table
+      #unrealPnlQueryTable
+      [value]="FilterData"
+      [columns]="tableColumns"
+      [totalRecords]="FilterData.length"
+      [paginator]="true"
+      [rows]="10"
+      dataKey="uuid"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="顯示第 {first} 至 {last} 筆，共 {totalRecords} 筆"
+      [rowsPerPageOptions]="[10, 15, 20]"
+      scrollHeight="75vh"
+      [scrollable]="true"
+      [resizableColumns]="true"
+      styleClass="p-datatable-gridlines p-datatable-sm p-datatable-striped"
+      [expandedRowKeys]="expendRows"
+    >
+      <ng-template pTemplate="header">
+        <tr id="bpaas-table-header">
+          <th
+            *ngFor="let column of tableColumns"
+            [pSortableColumn]="column.sortable ? column.field : ''"
+            [pSortableColumnDisabled]="
+              column.sortable && column.field !== 'no' ? false : true
+            "
+            scope="col"
+            pResizableColumn
+            [id]="column.field"
+          >
+            {{ column.header }}
+            <p-sortIcon
+              *ngIf="column.sortable && column.field !== 'no'"
+              [field]="column.field"
+            ></p-sortIcon>
+          </th>
+        </tr>
+      </ng-template>
+      <ng-template
+        pTemplate="body"
+        let-rowData
+        let-rowIndex="rowIndex"
+        let-columns="columns"
+        let-expanded="expanded"
+      >
+        <tr [pRowToggler]="rowData" (click)="onRowSelect(rowData, rowIndex)">
+          <td
+            *ngFor="let column of columns"
+            [class.bpaas-align-right]="column.numberField"
+          >
+            <ng-container *ngIf="column.field === 'no'; else otherFields">
+              <span style="cursor: pointer">
+                {{ rowData[column.field] }}
+                <i
+                  class="pi p-datatable-row-icon"
+                  [ngClass]="expanded ? 'pi-chevron-down' : 'pi-chevron-right'"
+                ></i>
+              </span>
+            </ng-container>
+            <ng-template #otherFields>
+              <ng-container *ngIf="column.numberField">
+                {{
+                  rowData[column.field] ??
+                    (column.numberFieldDefaultZero ? 0 : '') | dynamicDecimal
+                }}
+              </ng-container>
+              <ng-container *ngIf="!column.numberField">
+                {{ rowData[column.field] }}
+              </ng-container>
+            </ng-template>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="rowexpansion" let-rowData>
+        <tr>
+          <td colspan="24">
+            <p-table
+              [value]="rowData.detailData"
+              [columns]="detailtableColumns"
+              dataKey="uuid"
+              [style]="{ width: '100%' }"
+            >
+              <ng-template pTemplate="header">
+                <tr id="bpaas-table-header">
+                  <th
+                    *ngFor="let column of detailtableColumns"
+                    [pSortableColumn]="column.sortable ? column.field : ''"
+                    [pSortableColumnDisabled]="column.sortable ? false : true"
+                    scope="col"
+                    pResizableColumn
+                  >
+                    <label for="{{ column.field }}">
+                      {{ column.header }}
+                    </label>
+                    <p-sortIcon
+                      *ngIf="column.sortable"
+                      [field]="column.field"
+                    ></p-sortIcon>
+                  </th>
+                </tr>
+              </ng-template>
+              <ng-template
+                pTemplate="body"
+                let-detailRowData
+                let-columns="columns"
+                let-rowIndex="rowIndex"
+              >
+                <tr>
+                  <td
+                    *ngFor="let column of detailtableColumns"
+                    [class.bpaas-align-right]="column.numberField"
+                    [ngClass]="{ 'center-button': column.field === 'reprice' }"
+                  >
+                    <ng-container *ngIf="column.customField; else otherFields">
+                      <ng-container
+                        *ngIf="
+                          detailRowData['isShowBtn'] === 'Y' &&
+                            buttonList.query;
+                          else cantAdjust
+                        "
+                      >
+                        <p-button
+                          type="button"
+                          label="調整成本"
+                          (click)="doOpenUpdateDialog(detailRowData)"
+                        >
+                        </p-button>
+                      </ng-container>
+                      <ng-template #cantAdjust>
+                        <span *ngIf="detailRowData.ttype === '0'">
+                          [出借] 不可調整成本
+                        </span>
+                        <span *ngIf="detailRowData.ttype !== '0'">
+                          [非現股] 不可調整成本
+                        </span>
+                      </ng-template>
+                    </ng-container>
+                    <ng-template #otherFields>
+                      <ng-container *ngIf="column.numberField">
+                        {{
+                          detailRowData[column.field] ??
+                            (column.numberFieldDefaultZero ? 0 : '')
+                            | dynamicDecimal
+                        }}
+                      </ng-container>
+                      <ng-container *ngIf="!column.numberField">
+                        {{ detailRowData[column.field] }}
+                      </ng-container>
+                    </ng-template>
+                  </td>
+                </tr>
+              </ng-template>
+            </p-table>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td [colSpan]="tableColumns.length + 1">沒有符合條件的資料</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-panel>
+</div>
+<div class="mt-3">
+  <p-panel [header]="totaltableName" [toggleable]="true">
+    <p-table
+      [value]="FilterTotalData"
+      [columns]="totalTableColumns"
+      [totalRecords]="FilterTotalData.length"
+      [paginator]="false"
+      [rows]="10"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="顯示第 {first} 至 {last} 筆，共 {totalRecords} 筆"
+      [rowsPerPageOptions]="[10, 15, 20]"
+      scrollHeight="75vh"
+      [scrollable]="true"
+      [resizableColumns]="true"
+      styleClass="p-datatable-gridlines p-datatable-sm p-datatable-striped"
+    >
+      <ng-template pTemplate="header">
+        <tr id="bpaas-table-header">
+          <th
+            *ngFor="let column of totalTableColumns"
+            scope="col"
+            pResizableColumn
+            [id]="column.field"
+          >
+            {{ column.header }}
+          </th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-rowData let-columns="columns">
+        <tr>
+          <td
+            *ngFor="let column of columns"
+            [class.bpaas-align-right]="column.numberField"
+          >
+            <ng-container *ngIf="column.numberField">
+              {{
+                rowData[column.field] ??
+                  (column.numberFieldDefaultZero ? 0 : '') | dynamicDecimal
+              }}
+            </ng-container>
+            <ng-container *ngIf="!column.numberField">
+              {{ rowData[column.field] }}
+            </ng-container>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td [colSpan]="tableColumns.length + 1">沒有符合條件的資料</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-panel>
+</div>
+<div class="card flex justify-content-center">
+  <p-dialog
+    header="計算方式 "
+    [modal]="true"
+    [(visible)]="visible"
+    [style]="{ width: '50%' }"
+    [draggable]="false"
+  >
+    <div class="p-count-dialog-container">
+      <div class="title">未實現損益</div>
+      <div class="content-section">
+        <div class="text">現股：</div>
+        現值 ＝ 現價 × 即時庫存 － （相關稅費）<br />
+        付出成本 ＝ 買進價金 ＋ 手續費 - 累計配息<br />
+        成本均價 ＝ 付出成本 ÷ 庫存股數<br />
+        損益試算 ＝ 現值 － 付出成本<br />
+        持股比率 ＝ 現值 ÷ 總現值 × 100%<br />
+        獲利率 ＝ 損益試算 ÷ 付出成本 × 100%
+      </div>
+      <div class="content-section">
+        <div class="text">融資：</div>
+        即時庫存 ＝ 昨日餘額 － 今日賣出 ＋ 今日買進<br />
+        現值 ＝ 現價 × 即時庫存 －（融資金額 ＋ 利息 ＋ 相關稅費）<br />
+        付出成本 ＝ 自備款 ＋ 手續費 ※ 自備款 ＝ 買進價金 － 融資金額<br />
+        成本均價 ＝ （買進價金 ＋ 手續費） ÷ 庫存股數
+      </div>
+      <div class="content-section">
+        <div class="text">融券：</div>
+        即時庫存 ＝ 昨日餘額 － 今日買進 ＋ 今日賣出<br />
+        現值 ＝ 保證金 ＋ 擔保品 ＋ 利息收入 + 追繳保證金－（現價 × 庫存股數 ＋
+        預估手續費） - 標借費 - 標借利息<br />
+        付出成本 ＝ 保證金<br />
+        成本均價 ＝ 擔保品 ÷ 庫存股數 ※ 擔保品 ＝ 賣出價金 － 賣出手續費 -
+        交易稅 - 借券費
+      </div>
+    </div>
+  </p-dialog>
+</div>

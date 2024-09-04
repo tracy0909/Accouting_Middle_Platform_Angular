@@ -1,0 +1,9 @@
+$red-color: red;
+
+.red-text {
+  color: $red-color;
+}
+.red-info-container {
+  display: grid;
+  place-items: center; /* Center both horizontally and vertically */
+}

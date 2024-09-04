@@ -1,0 +1,258 @@
+<div class="mt-3">
+  <p-panel [header]="titleName" [toggleable]="true">
+    <form [formGroup]="formGroup">
+      <div class="grid p-fluid">
+        <div class="col-12 md:col-2 lg:col-2">
+          <label for="DBSource" class="bpaas-required">資料庫別</label>
+          <p-dropdown
+            id="DBSource"
+            [options]="options"
+            formControlName="DBSource"
+            optionValue="value"
+            optionLabel="label"
+            placeholder="請選擇"
+          >
+          </p-dropdown>
+          <small
+            *ngIf="formGroup.controls['DBSource']?.touched"
+            class="p-error"
+          >
+            {{ showErrorMessage('DBSource') }}
+          </small>
+        </div>
+        <div class="col-12 md:col-2 lg:col-2">
+          <label for="bhno">分公司</label>
+          <p-dropdown
+            id="bhno"
+            [options]="branchOptions"
+            formControlName="bhno"
+            optionValue="value"
+            optionLabel="label"
+            placeholder="請選擇"
+            [ngClass]="{ 'ng-dirty': formControlInvalid('bhno') }"
+          >
+          </p-dropdown>
+          <div *ngIf="formControlInvalid('bhno')">
+            <small
+              class="p-error"
+              *ngIf="formControl('bhno').errors?.['required']"
+            >
+              此欄位必須輸入
+            </small>
+          </div>
+        </div>
+        <div class="col-12 md:col-2 lg:col-2">
+          <label for="FCode">轉檔名稱</label>
+          <p-dropdown
+            id="FCode"
+            [options]="transferFileNameOptions"
+            formControlName="FCode"
+            optionValue="value"
+            optionLabel="label"
+            placeholder="請選擇"
+            [ngClass]="{ 'ng-dirty': formControlInvalid('FCode') }"
+          >
+          </p-dropdown>
+          <div *ngIf="formControlInvalid('FCode')">
+            <small
+              class="p-error"
+              *ngIf="formControl('FCode').errors?.['required']"
+            >
+              此欄位必須輸入
+            </small>
+          </div>
+        </div>
+        <div class="col-12 md:col-2 lg:col-2">
+          <label for="Status">今日轉檔狀態</label>
+          <p-dropdown
+            id="Status"
+            [options]="statusOptions"
+            formControlName="Status"
+            optionValue="value"
+            optionLabel="label"
+            placeholder="請選擇"
+            [ngClass]="{ 'ng-dirty': formControlInvalid('Status') }"
+          >
+          </p-dropdown>
+          <div *ngIf="formControlInvalid('Status')">
+            <small
+              class="p-error"
+              *ngIf="formControl('Status').errors?.['required']"
+            >
+              此欄位必須輸入
+            </small>
+          </div>
+        </div>
+        <div class="col-12 md:col-2 lg:col-2">
+          <label for="TrStatus">轉檔結果</label>
+          <p-dropdown
+            id="TrStatus"
+            [options]="trStatusOptions"
+            formControlName="TrStatus"
+            optionValue="value"
+            optionLabel="label"
+            placeholder="請選擇"
+            [ngClass]="{ 'ng-dirty': formControlInvalid('TrStatus') }"
+          >
+          </p-dropdown>
+          <div *ngIf="formControlInvalid('TrStatus')">
+            <small
+              class="p-error"
+              *ngIf="formControl('TrStatus').errors?.['required']"
+            >
+              此欄位必須輸入
+            </small>
+          </div>
+        </div>
+      </div>
+      <div class="grid p-fluid justify-content-end bpaas-button-row">
+        <div *ngIf="buttonList.query" class="col-12 md:col-3 lg:col-2">
+          <button
+            type="submit"
+            pButton
+            label="查詢"
+            (click)="onSearch()"
+          ></button>
+        </div>
+        <div *ngIf="buttonList.query" class="col-12 md:col-3 lg:col-2">
+          <button
+            type="button"
+            pButton
+            label="清除"
+            class="p-button-outlined mr-2"
+            (click)="onClearForm()"
+          ></button>
+        </div>
+      </div>
+    </form>
+  </p-panel>
+  <div class="flex justify-content-between mb-3 align-items-center">
+    <div *ngIf="queryTime">資料查詢時間：{{ queryTime }}</div>
+  </div>
+  <div>
+    <p-panel [showHeader]="false">
+      <p-table
+        #tableCopmonent
+        [value]="conversionMonitorings"
+        [columns]="tableColumns"
+        [paginator]="true"
+        [rows]="10"
+        [showCurrentPageReport]="true"
+        [rowsPerPageOptions]="[10, 15, 20]"
+        scrollHeight="50vh"
+        [scrollable]="true"
+        styleClass="p-datatable-gridlines p-datatable-sm p-datatable-striped"
+        [resizableColumns]="true"
+        currentPageReportTemplate="顯示第 {first} 至 {last} 筆，共 {totalRecords} 筆"
+        [totalRecords]="conversionMonitorings.length"
+      >
+        <ng-template pTemplate="header">
+          <tr id="bpaas-table-header">
+            <th
+              *ngFor="let column of tableColumns"
+              [pSortableColumn]="column.sortable ? column.field : ''"
+              [pSortableColumnDisabled]="
+                column.sortable && column.field !== 'no' ? false : true
+              "
+              [id]="'th-' + column.header"
+              pResizableColumn
+            >
+              {{ column.header }}
+              <p-sortIcon
+                *ngIf="column.sortable && column.field !== 'no'"
+                [field]="column.field"
+              ></p-sortIcon>
+            </th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-offer let-rowIndex="rowIndex">
+          <tr>
+            <td
+              *ngFor="let header of tableColumns"
+              [ngClass]="{
+                'bpaas-align-right': header.numberField,
+                succuss: offer[header.field] === TransferMonitorEnum.SUCCESS,
+                fail: offer[header.field] === TransferMonitorEnum.FAIL || offer[header.field] === TransferMonitorEnum.TRANSFERING,
+              }"
+            >
+              <ng-container *ngIf="header.numberField">
+                {{
+                  offer[header.field] ??
+                    (header.numberFieldDefaultZero ? 0 : '') | dynamicDecimal
+                }}
+              </ng-container>
+              <ng-container *ngIf="!header.numberField">
+                {{ offer[header.field] }}
+              </ng-container>
+              <ng-container *ngIf="!header.field">
+                {{ rowIndex + 1 }}</ng-container
+              >
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td [colSpan]="tableColumns.length + 1">沒有符合條件的資料</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </p-panel>
+
+    <!-- <p-panel header="合計" [toggleable]="true">
+      <p-table
+        [value]="FilterTotalData"
+        [columns]="summaryTableColumns"
+        scrollHeight="50vh"
+        styleClass="p-datatable-gridlines p-datatable-sm p-datatable-striped"
+        [totalRecords]="FilterData.length"
+      >
+        <ng-template pTemplate="header" let-columns>
+          <tr id="bpaas-table-header">
+            <th
+              *ngFor="let column of columns"
+              [pSortableColumn]="column.sortable ? column.field : ''"
+              [pSortableColumnDisabled]="column.sortable ? false : true"
+              scope="col"
+              pResizableColumn
+            >
+              <label for="{{ column.field }}">
+                {{ column.header }}
+              </label>
+              <p-sortIcon
+                *ngIf="column.sortable"
+                [field]="column.field"
+              ></p-sortIcon>
+            </th>
+          </tr>
+        </ng-template>
+        <ng-template
+          pTemplate="body"
+          let-rowData
+          let-rowIndex="rowIndex"
+          let-columns="columns"
+        >
+          <tr>
+            <td
+              *ngFor="let column of columns"
+              [class.bpaas-align-right]="column.numberField"
+            >
+              <ng-container *ngIf="column.numberField">
+                {{
+                  rowData[column.field] ??
+                    (column.numberFieldDefaultZero ? 0 : '') | dynamicDecimal
+                }}
+              </ng-container>
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td [colSpan]="summaryTableColumns.length + 2">
+              沒有符合條件的資料
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </p-panel> -->
+  </div>
+</div>

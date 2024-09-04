@@ -1,0 +1,29 @@
+export interface UnrealPnlQueryDetailResponse {
+  tdate: string;
+  ttype: string;
+  ttypename: string;
+  stock: string;
+  stocknm: string;
+  qty: string;
+  price: string;
+  mamt: string;
+  cost: string;
+  nowamt: string;
+  unreal: string;
+  break_even: string;
+  cramt: string;
+  keeprate: string;
+  dnamt: string;
+  gtamt: string;
+  fee: string;
+  tax: string;
+  interest: string;
+  seqno: string;
+  dlfee: string;
+  dseq: string;
+  currnm: string;
+  divamt: string;
+  wtype: string;
+  uuid: string;
+  ioflag: string;
+}

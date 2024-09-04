@@ -1,0 +1,305 @@
+<div class="mt-3">
+  <p-panel [header]="titleName" [toggleable]="true">
+    <form [formGroup]="formGroup">
+      <div class="grid p-fluid">
+        <div class="col-12 md:col-2 lg:col-2">
+          <label for="APISERVER" class="bpaas-required">查詢帳中API主機</label>
+          <p-dropdown
+            id="APISERVER"
+            [options]="options"
+            formControlName="APISERVER"
+            optionValue="value"
+            optionLabel="label"
+            placeholder="請選擇"
+            [ngClass]="{ 'ng-dirty': formControlInvalid('APISERVER') }"
+          >
+          </p-dropdown>
+          <div *ngIf="formControlInvalid('APISERVER')">
+            <small
+              class="p-error"
+              *ngIf="formControl('APISERVER').errors?.['required']"
+            >
+              此欄位必須輸入
+            </small>
+          </div>
+        </div>
+
+        <div class="col-12 md:col-2 lg:col-2">
+          <label for="idno" class="bpaas-required">身分證字號</label>
+          <input
+            type="text"
+            id="idno"
+            pInputText
+            formControlName="idno"
+            [ngClass]="{ 'ng-dirty': formControlInvalid('idno') }"
+          />
+          <small *ngIf="formGroup.controls['idno']?.touched" class="p-error">
+            {{ showErrorMessage('idno') }}
+          </small>
+        </div>
+        <div class="col-12 md:col-4 lg:col-4">
+          <app-stock-suggestions
+            [stockControl]="stockControl"
+            [stockNameControl]="stockNameControl"
+          ></app-stock-suggestions>
+        </div>
+        <div class="col-12 md:col-2 lg:col-2">
+          <label class="mr-2" for="exchangeRate">庫存類別</label>
+          <p-dropdown
+            [options]="ttypeOptions"
+            optionLabel="label"
+            optionValue="value"
+            formControlName="ttype"
+          />
+        </div>
+      </div>
+      <div class="grid p-fluid">
+        <div class="grid col-12 md:col-12 lg:col-12 flex align-items-end">
+          <div class="col-12 md:col-2 lg:col-2">
+            <label for="ctype">幣別</label>
+            <p-dropdown
+              id="ctype"
+              [options]="currencyOptions"
+              formControlName="ctype"
+              optionValue="value"
+              optionLabel="label"
+              placeholder="請選擇"
+            >
+            </p-dropdown>
+          </div>
+          <div class="col-12 md:col-2 lg:col-2">
+            <label class="mr-2" for="exchangeRate">參考匯率</label>
+            <p-dropdown
+              [options]="exchangeRateOptions"
+              optionLabel="label"
+              formControlName="exchangeRate"
+            />
+          </div>
+          <div class="col-12 md:col-2 lg:col-2">
+            <div class="mb-2">
+              <label for="redInfo"></label>
+              <div class="red-text">{{ redInfo }}</div>
+            </div>
+          </div>
+          <div class="col-12 md:col-2 lg:col-2 flex align-items-end">
+            <p-checkbox
+              [binary]="true"
+              inputId="binary"
+              formControlName="checkbox1"
+            />
+            <label class="pb-1" for="checkbox1">濾除下市股票</label>
+          </div>
+          <div class="col-12 md:col-2 lg:col-2 flex align-items-end">
+            <p-checkbox
+              [binary]="true"
+              inputId="binary"
+              formControlName="checkbox2"
+            />
+            <label class="pb-1" for="checkbox2">不含稅費</label>
+          </div>
+          <div class="col-12 md:col-2 lg:col-2 flex align-items-end">
+            <p-checkbox
+              [binary]="true"
+              inputId="binary"
+              formControlName="checkbox3"
+            />
+            <label class="pb-1" for="checkbox3">不計除息金</label>
+          </div>
+        </div>
+      </div>
+      <div class="grid p-fluid justify-content-end bpaas-button-row">
+        <span class="link-url my-auto mr-2" (click)="showDialog()"
+          >計算方式</span
+        >
+        <div *ngIf="buttonList.query" class="col-12 md:col-3 lg:col-2">
+          <button
+            type="submit"
+            pButton
+            label="查詢"
+            (click)="onSearch()"
+          ></button>
+        </div>
+        <div *ngIf="buttonList.query" class="col-12 md:col-3 lg:col-2">
+          <button
+            type="button"
+            pButton
+            label="清除"
+            class="p-button-outlined mr-2"
+            (click)="onClearForm()"
+          ></button>
+        </div>
+      </div>
+    </form>
+  </p-panel>
+  <div class="flex justify-content-between mb-3 align-items-center">
+    <div *ngIf="queryTime">資料查詢時間：{{ queryTime }}</div>
+    <!-- <div *ngIf="hasSearched && buttonList.download" class="text-right">
+      <button
+        pButton
+        type="button"
+        label="匯出 Excel"
+        icon="pi pi-file-excel"
+        (click)="doExportToExcel()"
+      ></button>
+    </div> -->
+  </div>
+  <div>
+    <p-panel [showHeader]="false">
+      <p-table
+        #tableCopmonent
+        [value]="FilterData"
+        [columns]="tableColumns"
+        [paginator]="true"
+        [rows]="10"
+        [showCurrentPageReport]="true"
+        [rowsPerPageOptions]="[10, 15, 20]"
+        scrollHeight="50vh"
+        [scrollable]="true"
+        styleClass="p-datatable-gridlines p-datatable-sm p-datatable-striped"
+        [resizableColumns]="true"
+        currentPageReportTemplate="顯示第 {first} 至 {last} 筆，共 {totalRecords} 筆"
+        [totalRecords]="FilterData.length"
+      >
+        <ng-template pTemplate="header">
+          <tr id="bpaas-table-header">
+            <th
+              *ngFor="let column of tableColumns"
+              [pSortableColumn]="column.sortable ? column.field : ''"
+              [pSortableColumnDisabled]="
+                column.sortable && column.field !== 'no' ? false : true
+              "
+              [id]="'th-' + column.header"
+              pResizableColumn
+            >
+              {{ column.header }}
+              <p-sortIcon
+                *ngIf="column.sortable && column.field !== 'no'"
+                [field]="column.field"
+              ></p-sortIcon>
+            </th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-offer>
+          <tr>
+            <td
+              *ngFor="let header of tableColumns"
+              [class.bpaas-align-right]="header.numberField"
+            >
+              <ng-container *ngIf="header.numberField">
+                {{
+                  offer[header.field] ??
+                    (header.numberFieldDefaultZero ? 0 : '') | dynamicDecimal
+                }}
+              </ng-container>
+              <ng-container *ngIf="!header.numberField">
+                {{ offer[header.field] }}
+              </ng-container>
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td [colSpan]="tableColumns.length + 1">沒有符合條件的資料</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </p-panel>
+
+    <p-panel header="合計" [toggleable]="true">
+      <p-table
+        [value]="FilterTotalData"
+        [columns]="summaryTableColumns"
+        scrollHeight="50vh"
+        styleClass="p-datatable-gridlines p-datatable-sm p-datatable-striped"
+        [totalRecords]="FilterData.length"
+      >
+        <ng-template pTemplate="header" let-columns>
+          <tr id="bpaas-table-header">
+            <th
+              *ngFor="let column of columns"
+              [pSortableColumn]="column.sortable ? column.field : ''"
+              [pSortableColumnDisabled]="column.sortable ? false : true"
+              scope="col"
+              pResizableColumn
+            >
+              <label for="{{ column.field }}">
+                {{ column.header }}
+              </label>
+              <p-sortIcon
+                *ngIf="column.sortable"
+                [field]="column.field"
+              ></p-sortIcon>
+            </th>
+          </tr>
+        </ng-template>
+        <ng-template
+          pTemplate="body"
+          let-rowData
+          let-rowIndex="rowIndex"
+          let-columns="columns"
+        >
+          <tr>
+            <td
+              *ngFor="let column of columns"
+              [class.bpaas-align-right]="column.numberField"
+            >
+              <ng-container *ngIf="column.numberField">
+                {{
+                  rowData[column.field] ??
+                    (column.numberFieldDefaultZero ? 0 : '') | dynamicDecimal
+                }}
+              </ng-container>
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td [colSpan]="summaryTableColumns.length + 2">
+              沒有符合條件的資料
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </p-panel>
+  </div>
+</div>
+
+<div class="card flex justify-content-center">
+  <p-dialog
+    header="計算方式"
+    [modal]="true"
+    [(visible)]="visible"
+    [style]="{ width: '50%' }"
+    [draggable]="false"
+  >
+    <div class="p-count-dialog-container">
+      <div class="title">未實現損益</div>
+      <div class="content-section">
+        <div class="text">現股：</div>
+        即時庫存 ＝ 昨日餘額 － 今日賣出 ＋ 今日買進<br />
+        現值 ＝ 現價 × 即時庫存 － （相關稅費）<br />
+        付出成本 ＝ 買進價金 ＋ 手續費 - 累計配息<br />
+        成本均價 ＝ 付出成本 ÷ 庫存股數<br />
+        損益試算 ＝ 現值 － 付出成本<br />
+        持股比率 ＝ 現值 ÷ 總現值 × 100%<br />
+        獲利率 ＝ 損益試算 ÷ 付出成本 × 100%
+      </div>
+      <div class="content-section">
+        <div class="text">融資：</div>
+        即時庫存 ＝ 昨日餘額 － 今日賣出 ＋ 今日買進<br />
+        現值 ＝ 現價 × 即時庫存 －（融資金額 ＋ 利息 ＋ 相關稅費）<br />
+        付出成本 ＝ 自備款 ＋ 手續費 ※ 自備款 ＝ 買進價金 － 融資金額<br />
+        成本均價 ＝ （買進價金 ＋ 手續費） ÷ 庫存股數
+      </div>
+      <div class="content-section">
+        <div class="text">融券：</div>
+        即時庫存 ＝ 昨日餘額 － 今日買進 ＋ 今日賣出<br />
+        現值 ＝ 保證金 ＋ 擔保品 ＋ 利息收入 + 追繳保證金－（現價 × 庫存股數 ＋
+        預估手續費） - 標借費 - 標借利息 <br />
+        付出成本 ＝ 保證金<br />
+        成本均價 ＝ 擔保品 ÷ 庫存股數 ※ 擔保品 ＝ 賣出價金 － 賣出手續費 -
+        交易稅 - 借券費
+      </div>
+    </div>
+  </p-dialog>
+</div>

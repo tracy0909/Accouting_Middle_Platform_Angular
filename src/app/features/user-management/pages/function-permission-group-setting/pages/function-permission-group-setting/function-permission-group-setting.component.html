@@ -1,0 +1,155 @@
+<div class="mt-3">
+  <p-panel [header]="titleName" [toggleable]="true">
+    <form [formGroup]="formGroup">
+      <div class="grid p-fluid">
+        <div class="col-12 md:col-2 lg:col-2">
+          <label for="DBSource" class="bpaas-required">資料庫別</label>
+          <p-dropdown
+            id="DBSource"
+            [options]="options"
+            formControlName="DBSource"
+            optionValue="value"
+            optionLabel="label"
+            placeholder="請選擇"
+          >
+          </p-dropdown>
+        </div>
+        <div class="col-12 md:col-2 lg:col-2">
+          <label for="UserId">使用者帳號</label>
+          <input pInputText type="text" formControlName="UserId" />
+        </div>
+        <div class="col-12 md:col-2 lg:col-2">
+          <label for="UserName">使用者名稱</label>
+          <input pInputText type="text" formControlName="UserName" />
+        </div>
+        <div class="col-12 md:col-2 lg:col-2">
+          <label for="GroupId">群組代碼</label>
+          <input pInputText type="text" formControlName="GroupId" />
+        </div>
+      </div>
+      <div class="grid p-fluid justify-content-end bpaas-button-row">
+        <div *ngIf="buttonList.query" class="col-12 md:col-3 lg:col-2">
+          <button
+            type="submit"
+            pButton
+            label="查詢"
+            (click)="updateParams()"
+          ></button>
+        </div>
+        <div *ngIf="buttonList.query" class="col-12 md:col-3 lg:col-2">
+          <button
+            type="button"
+            pButton
+            label="清除"
+            class="p-button-outlined mr-2"
+            (click)="onClearForm()"
+          ></button>
+        </div>
+      </div>
+    </form>
+  </p-panel>
+</div>
+<div *ngIf="queryTime" class="mb-3">資料查詢時間：{{ queryTime }}</div>
+<p-panel [showHeader]="false">
+  <!-- 編輯操作的功能表列（新增、刪除） -->
+  <p-menubar
+    *ngIf="shouldShowMenubar"
+    [model]="systemEditMenu"
+    class="bpaas-detail-menubar"
+  ></p-menubar>
+  <!-- 顯示系統參數資料的表格 -->
+  <p-table
+    #tableComponent
+    [value]="tableData"
+    [columns]="tableColumns"
+    [paginator]="true"
+    [rows]="10"
+    [showCurrentPageReport]="true"
+    [rowsPerPageOptions]="[10, 15, 20]"
+    scrollHeight="50vh"
+    [scrollable]="true"
+    stateStorage="session"
+    styleClass="p-datatable-gridlines p-datatable-sm p-datatable-striped"
+    [resizableColumns]="true"
+    currentPageReportTemplate="顯示第 {first} 至 {last} 筆，共 {totalRecords} 筆"
+    [(selection)]="selectedUsers"
+    [metaKeySelection]="false"
+    (onRowUnselect)="onSelect()"
+    (onRowSelect)="onSelect()"
+    (onHeaderCheckboxToggle)="onSelect()"
+  >
+    <ng-template pTemplate="header" let-columns>
+      <!-- 表頭，包含用於選擇的複選框 -->
+      <tr id="bpaas-table-header">
+        <th
+          alignFrozen="left"
+          pFrozenColumn
+          scope="col"
+          style="
+            min-width: 42px !important;
+            max-width: 42px !important;
+            width: 42px !important;
+            text-align: center;
+          "
+        >
+          <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+        </th>
+        <th scope="col">筆數</th>
+
+        <!-- 動態產生的列頭 -->
+        <th
+          *ngFor="let column of columns"
+          [pSortableColumn]="column.sortable ? column.field : ''"
+          [pSortableColumnDisabled]="column.sortable ? false : true"
+          scope="col"
+          pResizableColumn
+        >
+          <label for="{{ column.field }}">
+            {{ column.header }}
+          </label>
+          <p-sortIcon
+            *ngIf="column.sortable"
+            [field]="column.field"
+          ></p-sortIcon>
+        </th>
+      </tr>
+    </ng-template>
+    <ng-template
+      pTemplate="body"
+      let-rowData
+      let-rowIndex="rowIndex"
+      let-columns="columns"
+    >
+      <!-- <tr [pSelectableRow]="rowData" [pSelectableRowIndex]="rowIndex"> -->
+      <tr>
+        <td
+          alignFrozen="left"
+          pFrozenColumn
+          style="
+            min-width: 42px !important;
+            max-width: 42px !important;
+            width: 42px !important;
+            text-align: center;
+          "
+        >
+          <p-tableCheckbox [value]="rowData"></p-tableCheckbox>
+        </td>
+        <td class="text">{{ rowData.serialNumber }}</td>
+
+        <!-- 顯示每列資料的儲存格，並包含用於編輯的點擊處理器 -->
+        <td
+          *ngFor="let column of columns"
+          style="cursor: pointer"
+          (click)="doOpenDialog('editTreeNode', rowData)"
+        >
+          {{ rowData[column.field] }}
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td [colSpan]="tableColumns.length + 2">沒有符合條件的資料</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</p-panel>

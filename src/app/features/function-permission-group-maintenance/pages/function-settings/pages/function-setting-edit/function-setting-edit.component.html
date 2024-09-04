@@ -1,0 +1,162 @@
+<!-- 顯示表格和選單列的面板 -->
+<div>
+  <p-panel [showHeader]="false">
+    <label for="GroupId">
+      群組：
+      {{ groupId }} {{ groupName }}
+    </label>
+    <!-- 顯示系統參數資料的表格 -->
+    <p-table
+      *ngIf="dataLoaded"
+      styleClass="p-datatable-gridlines p-datatable-sm p-datatable-striped"
+      [value]="functionSettingsData"
+      [columns]="tableColumns"
+      [rowsPerPageOptions]="[10, 15, 20]"
+      [paginator]="true"
+      [rows]="10"
+      [resizableColumns]="true"
+      [scrollable]="true"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="顯示第 {first} 至 {last} 筆，共 {totalRecords} 筆"
+    >
+      <!-- 表頭 -->
+      <ng-template pTemplate="header" let-columns>
+        <tr id="bpaas-table-header">
+          <th scope="col"></th>
+          <th scope="col" style="width: 8px">
+            <p-checkbox
+              [(ngModel)]="selectAll"
+              [binary]="true"
+              (onChange)="onSelectAllChange($event)"
+            ></p-checkbox>
+          </th>
+          <!-- 動態生成的表頭列 -->
+          <th
+            *ngFor="let column of columns"
+            scope="col"
+            pResizableColumn
+            class="p-d-flex p-flex-column p-jc-center p-ai-center"
+          >
+            <label for="{{ column.field }}">
+              {{ column.header }}
+            </label>
+          </th>
+        </tr>
+      </ng-template>
+      <!-- 表格內容 -->
+      <ng-template
+        pTemplate="body"
+        let-rowData
+        let-rowIndex="rowIndex"
+        let-columns="columns"
+      >
+        <tr [formGroup]="getFormGroup(rowIndex)">
+          <!-- 顯示序號 -->
+          <td
+            alignFrozen="left"
+            pFrozenColumn
+            style="
+              min-width: 40px !important;
+              max-width: 40px !important;
+              width: 40px !important;
+              text-align: center;
+            "
+          >
+            {{ rowIndex + 1 }}
+          </td>
+          <!-- 每一行前方的選擇框 -->
+          <td>
+            <p-checkbox
+              [formControlName]="'Selected'"
+              [binary]="true"
+              (onChange)="onSelectedChange($event, rowIndex)"
+            ></p-checkbox>
+          </td>
+          <!-- 動態生成的資料列修改權限-->
+          <ng-container *ngFor="let column of columns">
+            <td *ngIf="column.field !== 'Selected'">
+              <ng-container [ngSwitch]="column.field">
+                <ng-container *ngSwitchCase="'I'">
+                  <p-checkbox
+                    *ngIf="isButtonInList(getFormGroup(rowIndex), 'I')"
+                    [formControlName]="'I'"
+                    [binary]="true"
+                  ></p-checkbox>
+                </ng-container>
+                <ng-container *ngSwitchCase="'A'">
+                  <p-checkbox
+                    *ngIf="isButtonInList(getFormGroup(rowIndex), 'A')"
+                    [formControlName]="'A'"
+                    [binary]="true"
+                  ></p-checkbox>
+                </ng-container>
+                <ng-container *ngSwitchCase="'U'">
+                  <p-checkbox
+                    *ngIf="isButtonInList(getFormGroup(rowIndex), 'U')"
+                    [formControlName]="'U'"
+                    [binary]="true"
+                  ></p-checkbox>
+                </ng-container>
+                <ng-container *ngSwitchCase="'D'">
+                  <p-checkbox
+                    *ngIf="isButtonInList(getFormGroup(rowIndex), 'D')"
+                    [formControlName]="'D'"
+                    [binary]="true"
+                  ></p-checkbox>
+                </ng-container>
+                <ng-container *ngSwitchCase="'L'">
+                  <p-checkbox
+                    *ngIf="isButtonInList(getFormGroup(rowIndex), 'L')"
+                    [formControlName]="'L'"
+                    [binary]="true"
+                  ></p-checkbox>
+                </ng-container>
+                <ng-container *ngSwitchDefault>
+                  {{ getFormGroup(rowIndex).get(column.field)?.value }}
+                </ng-container>
+              </ng-container>
+            </td>
+          </ng-container>
+        </tr>
+      </ng-template>
+      <!-- 無數據時顯示的模板 -->
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td [colSpan]="tableColumns.length + 2">沒有符合條件的資料</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-panel>
+  <!-- 底部按鈕 -->
+  <div class="flex justify-content-end bpaas-dialog-footer" style="z-index: 0">
+    <div class="mr-2">
+      <button
+        type="button"
+        pButton
+        label="儲存"
+        icon="pi pi-save"
+        (click)="saveFunctionGroupSetting()"
+      ></button>
+    </div>
+    <div class="mr-2">
+      <button
+        type="button"
+        pButton
+        label="清除"
+        icon="pi pi-wrench"
+        class="p-button-outlined"
+        (click)="clearCheckboxes()"
+      ></button>
+    </div>
+    <div>
+      <button
+        type="button"
+        pButton
+        label="取消"
+        icon="pi pi-times"
+        class="p-button-outlined"
+        (click)="closeDialog()"
+      ></button>
+    </div>
+  </div>
+</div>

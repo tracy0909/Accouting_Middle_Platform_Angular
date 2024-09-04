@@ -1,0 +1,140 @@
+<p-panel>
+  <form [formGroup]="queryForm">
+    <div class="grid p-fluid">
+      <div class="col-12">
+        <label for="GroupId" class="bpaas-required">群組代碼</label>
+        <input
+          type="text"
+          id="GroupId"
+          pInputText
+          formControlName="GroupId"
+          maxlength="10"
+          [ngClass]="{ 'ng-dirty': formControlInvalid('GroupId') }"
+        />
+        <div *ngIf="formControlInvalid('GroupId')">
+          <small
+            class="p-error"
+            *ngIf="formControl('GroupId').errors?.['required']"
+          >
+            此欄位必須輸入
+          </small>
+          <small
+            class="p-error"
+            *ngIf="formControl('GroupId').errors?.['minlength']"
+          >
+            最少需輸入兩個字
+          </small>
+        </div>
+      </div>
+      <div class="col-12">
+        <label for="GroupName" class="bpaas-required">群組名稱</label>
+        <input
+          type="text"
+          id="GroupName"
+          pInputText
+          formControlName="GroupName"
+          maxlength="50"
+          [ngClass]="{ 'ng-dirty': formControlInvalid('GroupName') }"
+        />
+        <div *ngIf="formControlInvalid('GroupName')">
+          <small
+            class="p-error"
+            *ngIf="formControl('GroupName').errors?.['required']"
+          >
+            此欄位必須輸入
+          </small>
+        </div>
+      </div>
+      <div class="col-12">
+        <label for="Status">狀態</label>
+        <div class="flex">
+          <div class="flex align-items-center">
+            <p-radioButton
+              formControlName="Status"
+              value="Y"
+              inputId="Status"
+            />
+            <label for="Status" class="mx-1">啟用</label>
+          </div>
+          <div class="flex align-items-center">
+            <p-radioButton
+              formControlName="Status"
+              value="N"
+              inputId="Status"
+            />
+            <label for="Status" class="mx-1">停用</label>
+          </div>
+        </div>
+      </div>
+      <div class="col-12">
+        <label for="Remark">描述</label>
+        <textarea
+          type="text"
+          id="Remark"
+          pInputTextarea
+          formControlName="Remark"
+          maxlength="50"
+          [rows]="1"
+          [autoResize]="true"
+          [ngClass]="{ 'ng-dirty': formControlInvalid('Remark') }"
+        ></textarea>
+        <div *ngIf="formControlInvalid('Remark')">
+          <small
+            class="p-error"
+            *ngIf="formControl('Remark').errors?.['required']"
+          >
+            此欄位必須輸入
+          </small>
+        </div>
+      </div>
+      <div class="col-6" *ngIf="isEdit">
+        <label for="ModDateTime">更新日期：</label>
+        <span id="ModDateTime">{{ queryForm.get('ModDateTime')?.value }}</span>
+      </div>
+      <div class="col-6" *ngIf="isEdit">
+        <label for="ModUser">更新人員：</label>
+        <span id="ModUser">{{ queryForm.get('ModUser')?.value }}</span>
+      </div>
+    </div>
+  </form>
+</p-panel>
+<div class="flex justify-content-end bpaas-dialog-footer">
+  <div class="mr-2">
+    <button
+      type="button"
+      pButton
+      label="儲存"
+      icon="pi pi-save"
+      (click)="onSubmit()"
+    ></button>
+  </div>
+  <div class="mr-2">
+    <button
+      type="button"
+      pButton
+      label="清除"
+      icon="pi pi-wrench"
+      class="p-button-outlined"
+      (click)="isEdit ? onResetForm() : queryForm.reset()"
+    ></button>
+  </div>
+  <div class="mr-2" *ngIf="isEdit && buttonList.delete">
+    <button
+      type="button"
+      pButton
+      label="刪除"
+      icon="pi pi-trash"
+      (click)="onDelete()"
+    ></button>
+  </div>
+  <div>
+    <button
+      type="button"
+      pButton
+      label="取消"
+      icon="pi pi-times"
+      class="p-button-outlined"
+      (click)="onCloseDialog()"
+    ></button>
+  </div>
+</div>

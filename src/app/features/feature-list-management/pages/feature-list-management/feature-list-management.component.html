@@ -1,0 +1,147 @@
+<div class="mt-3">
+  <p-panel [header]="titleName" [toggleable]="true">
+    <form [formGroup]="formGroup">
+      <div class="grid p-fluid">
+        <div class="col-12 md:col-2 lg:col-2">
+          <label for="DBSource" class="bpaas-required">資料庫別</label>
+          <p-dropdown
+            id="DBSource"
+            [options]="options"
+            formControlName="DBSource"
+            optionValue="value"
+            optionLabel="label"
+            placeholder="請選擇"
+          >
+          </p-dropdown>
+          <small
+            *ngIf="formGroup.controls['DBSource']?.touched"
+            class="p-error"
+          >
+            {{ showErrorMessage("DBSource") }}
+          </small>
+        </div>
+        <div class="col-12 md:col-2 lg:col-2">
+          <label for="ModuleId">功能代碼</label>
+          <input pInputText type="text" formControlName="ModuleId" />
+        </div>
+        <div class="col-12 md:col-2 lg:col-2">
+          <label for="ModuleName">功能名稱</label>
+          <input pInputText type="text" formControlName="ModuleName" />
+        </div>
+        <div class="col-12 md:col-2 lg:col-2">
+          <label for="Status">狀態</label>
+          <div class="flex">
+            <div class="flex align-items-center">
+              <p-radioButton
+                formControlName="Status"
+                value=""
+                inputId="Status"
+              />
+              <label for="Status" class="mx-1">全部</label>
+            </div>
+            <div class="flex align-items-center">
+              <p-radioButton
+                formControlName="Status"
+                value="Y"
+                inputId="Status"
+              />
+              <label for="Status" class="mx-1">啟用</label>
+            </div>
+            <div class="flex align-items-center">
+              <p-radioButton
+                formControlName="Status"
+                value="N"
+                inputId="Status"
+              />
+              <label for="Status" class="mx-1">停用</label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="grid p-fluid justify-content-end bpaas-button-row">
+        <div *ngIf="buttonList.query" class="col-12 md:col-3 lg:col-2">
+          <button
+            type="submit"
+            pButton
+            label="查詢"
+            (click)="seacrchAndUpdateParams()"
+          ></button>
+        </div>
+        <div *ngIf="buttonList.query" class="col-12 md:col-3 lg:col-2">
+          <button
+            type="button"
+            pButton
+            label="清除"
+            class="p-button-outlined mr-2"
+            (click)="onClearForm()"
+          ></button>
+        </div>
+      </div>
+    </form>
+  </p-panel>
+  <div *ngIf="queryTime" class="mb-3">資料查詢時間：{{ queryTime }}</div>
+  <p-panel>
+    <!-- 編輯操作的功能表列（新增、刪除） -->
+    <p-menubar
+      *ngIf="shouldShowMenubar"
+      [model]="systemEditMenu"
+      class="bpaas-detail-menubar"
+    ></p-menubar>
+    <p-treeTable
+      (onNodeSelect)="changeMenustauts()"
+      (onNodeUnselect)="changeMenustauts()"
+      [value]="data"
+      [columns]="tableColumns"
+      selectionMode="multiple"
+      [metaKeySelection]="false"
+      [(selection)]="selectedNodes"
+      [paginator]="true"
+      [rows]="10"
+      [rowsPerPageOptions]="[10, 15, 20]"
+      scrollHeight="50vh"
+      [scrollable]="true"
+      scrollHeight="300px"
+      [scrollable]="true"
+      [tableStyle]="{ 'min-width': '150rem' }"
+      styleClass="p-datatable-gridlines p-datatable-sm p-datatable-striped"
+      currentPageReportTemplate="顯示第 {first} 至 {last} 筆，共 {totalRecords} 筆"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th *ngFor="let col of tableColumns">{{ col.header }}</th>
+        </tr>
+      </ng-template>
+      <ng-template
+        pTemplate="body"
+        let-rowNode
+        let-rowData="rowData"
+        let-columns="columns"
+      >
+        <tr [ttRow]="rowNode" [ttSelectableRow]="rowNode">
+          <td
+            *ngFor="let column of columns; let i = index"
+            (dblclick)="doOpenDialog('editTreeNode', rowData)"
+          >
+            <ng-container
+              *ngIf="column.field === 'Status'; else defaultTemplate"
+            >
+              {{ convertStatusValue(rowData[column.field]) }}
+            </ng-container>
+            <ng-template #defaultTemplate>
+              <p-treeTableToggler
+                [rowNode]="rowNode"
+                *ngIf="i === 0"
+              ></p-treeTableToggler>
+              {{ rowData[column.field] }}
+            </ng-template>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td [colSpan]="tableColumns.length + 2">沒有符合條件的資料</td>
+        </tr>
+      </ng-template>
+    </p-treeTable>
+  </p-panel>
+</div>

@@ -1,0 +1,219 @@
+<div class="mt-3">
+  <form [formGroup]="formGroup">
+    <p-panel [header]="titleName" [toggleable]="true">
+      <div class="card">
+        <div class="grid p-fluid">
+          <div class="col-12 md:col-2 lg:col-2">
+            <label for="APISERVER" class="bpaas-required"
+              >查詢帳中API主機</label
+            >
+            <p-dropdown
+              id="APISERVER"
+              [options]="apiServerOptions"
+              formControlName="APISERVER"
+              optionValue="value"
+              optionLabel="label"
+              placeholder="請選擇"
+              [ngClass]="{ 'ng-dirty': formControlInvalid('APISERVER') }"
+            ></p-dropdown>
+            <small *ngIf="formControlInvalid('APISERVER')" class="p-error">
+              {{ showErrorMessage('APISERVER') }}
+            </small>
+          </div>
+          <div class="col-12 md:col-2 lg:col-2">
+            <label for="bhno" class="bpaas-required">分公司</label>
+            <p-dropdown
+              id="bhno"
+              [options]="branchOptions"
+              formControlName="bhno"
+              optionValue="value"
+              optionLabel="label"
+              placeholder="請選擇"
+              [ngClass]="{ 'ng-dirty': formControlInvalid('bhno') }"
+            ></p-dropdown>
+            <small *ngIf="formControlInvalid('bhno')" class="p-error">
+              {{ showErrorMessage('bhno') }}
+            </small>
+          </div>
+          <div class="col-12 md:col-2 lg:col-2">
+            <label for="cseq" class="bpaas-required">帳號</label>
+            <input
+              id="cseq"
+              pInputText
+              type="text"
+              formControlName="cseq"
+              [ngClass]="{ 'ng-dirty': formControlInvalid('cseq') }"
+            />
+            <small *ngIf="formControlInvalid('cseq')" class="p-error">
+              {{ showErrorMessage('cseq') }}
+            </small>
+          </div>
+          <div class="col-12 md:col-2 lg:col-2">
+            <label for="bdate" class="bpaas-required"
+              >對帳年月
+              <i
+                class="pi pi-question-circle ml-2"
+                pTooltip="格式(YYYY/MM)，如2020/10"
+                tooltipPosition="right"
+              ></i>
+            </label>
+            <p-calendar
+              [showIcon]="true"
+              appendTo="body"
+              view="month"
+              dateFormat="yy/mm"
+              dataType="string"
+              formControlName="bdate"
+              [showOnFocus]="false"
+              id="bdate"
+              [ngClass]="{ 'ng-dirty': formControlInvalid('bdate') }"
+            >
+            </p-calendar>
+            <small *ngIf="formControlInvalid('bdate')" class="p-error">
+              {{ showErrorMessage('bdate') }}
+            </small>
+          </div>
+          <div class="col-12 md:col-2 lg:col-2">
+            <label for="edate">
+              匯出日
+              <i
+                class="pi pi-question-circle ml-2"
+                pTooltip="日期格式(YYYY/MM/DD)"
+                tooltipPosition="right"
+              ></i>
+            </label>
+            <p-calendar
+              [showIcon]="true"
+              appendTo="body"
+              dateFormat="yy/mm/dd"
+              dataType="string"
+              formControlName="edate"
+              [showOnFocus]="false"
+              id="edate"
+            >
+            </p-calendar>
+          </div>
+        </div>
+      </div>
+      <div class="grid p-fluid justify-content-end bpaas-button-row">
+        <span class="link-url my-auto mr-2" (click)="showDialog()"
+          >計算方式</span
+        >
+        <div *ngIf="buttonList.query" class="col-12 md:col-3 lg:col-2">
+          <button
+            type="button"
+            pButton
+            label="查詢"
+            (click)="doQuery()"
+          ></button>
+        </div>
+        <div *ngIf="buttonList.query" class="col-12 md:col-3 lg:col-2">
+          <button
+            type="button"
+            pButton
+            label="清除"
+            class="p-button-outlined mr-2"
+            (click)="onClear()"
+          ></button>
+        </div>
+      </div>
+    </p-panel>
+  </form>
+</div>
+<div class="flex justify-content-between mb-3 align-items-center">
+  <div *ngIf="queryTime">資料查詢時間：{{ queryTime }}</div>
+  <!-- <div *ngIf="hasSearched && buttonList.download" class="text-right">
+    <button
+      pButton
+      type="button"
+      label="匯出 Excel"
+      icon="pi pi-file-excel"
+      (click)="doExportToExcel()"
+    ></button>
+  </div> -->
+</div>
+<div class="mt-3">
+  <p-panel [showHeader]="false">
+    <p-table
+      #monthlyStmtPnlTable
+      [value]="tableData"
+      [columns]="tableColumns"
+      [paginator]="true"
+      [rows]="10"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="顯示第 {first} 至 {last} 筆，共 {totalRecords} 筆"
+      [rowsPerPageOptions]="[10, 15, 20]"
+      scrollHeight="75vh"
+      [scrollable]="true"
+      [resizableColumns]="true"
+      styleClass="p-datatable-gridlines p-datatable-sm p-datatable-striped"
+    >
+      <ng-template pTemplate="header">
+        <tr id="bpaas-table-header">
+          <th
+            *ngFor="let column of tableColumns"
+            [pSortableColumn]="column.sortable ? column.field : ''"
+            [pSortableColumnDisabled]="
+              column.sortable && column.field !== 'no' ? false : true
+            "
+            scope="col"
+            pResizableColumn
+            [id]="column.field"
+          >
+            {{ column.header }}
+            <p-sortIcon
+              *ngIf="column.sortable && column.field !== 'no'"
+              [field]="column.field"
+            ></p-sortIcon>
+          </th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-rowData let-columns="columns">
+        <tr>
+          <td
+            *ngFor="let column of columns"
+            [class.bpaas-align-right]="column.numberField"
+          >
+            <ng-container *ngIf="column.numberField">
+              {{
+                rowData[column.field] ??
+                  (column.numberFieldDefaultZero ? 0 : '') | dynamicDecimal
+              }}
+            </ng-container>
+            <ng-container *ngIf="!column.numberField">
+              {{ rowData[column.field] }}
+            </ng-container>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td [colSpan]="tableColumns.length + 1">沒有符合條件的資料</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-panel>
+</div>
+<div class="card flex justify-content-center">
+  <p-dialog
+    header="計算方式"
+    [modal]="true"
+    [(visible)]="visible"
+    [style]="{ width: '50%' }"
+    [draggable]="false"
+  >
+    <div class="p-count-dialog-container">
+      <div class="title">月對帳單-庫存損益備查查詢</div>
+      <div class="content-section">
+        (1) 平均成本價格 = (現股,融資)買入成本之平均; (融券)賣出價格平均<br />
+        (2) 總投資成本 = 庫存餘額 * (1)<br />
+        (3) 參考市價 = 庫存餘額匯出當日收盤價<br />
+        (4) 參考市值 = 庫存餘額 * (3)<br />
+        (5) [不含息]參考投資損益 = (現股,融資) (4)-(2); (融券) (2)-(4)<br />
+        (6) [不含息]參考報酬率% = (5)/(2)<br />
+        (7) [含息]參考投資損益 = (現股,融資)[(5) + 累積配息]<br />
+        (8) [含息]參考報酬率% = (現股,融資) (7)/(2)
+      </div>
+    </div>
+  </p-dialog>
+</div>

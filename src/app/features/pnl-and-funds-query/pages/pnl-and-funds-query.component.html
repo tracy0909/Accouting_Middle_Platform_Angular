@@ -1,0 +1,254 @@
+<div class="mt-3">
+  <p-panel [header]="titleName" [toggleable]="true">
+    <form [formGroup]="formGroup">
+      <div class="grid p-fluid">
+        <div class="col-12 md:col-2 lg:col-2">
+          <label for="APISERVER" class="bpaas-required">查詢帳中API主機</label>
+          <p-dropdown
+            id="APISERVER"
+            [options]="options"
+            formControlName="APISERVER"
+            optionValue="value"
+            optionLabel="label"
+            placeholder="請選擇"
+            [ngClass]="{ 'ng-dirty': formControlInvalid('APISERVER') }"
+          >
+          </p-dropdown>
+          <div *ngIf="formControlInvalid('APISERVER')">
+            <small
+              class="p-error"
+              *ngIf="formControl('APISERVER').errors?.['required']"
+            >
+              此欄位必須輸入
+            </small>
+          </div>
+        </div>
+        <div class="col-12 md:col-2 lg:col-2">
+          <label for="bhno" class="bpaas-required">分公司</label>
+          <p-dropdown
+            id="bhno"
+            [options]="branchOptions"
+            formControlName="bhno"
+            optionValue="value"
+            optionLabel="label"
+            placeholder="請選擇"
+            [ngClass]="{ 'ng-dirty': formControlInvalid('bhno') }"
+          >
+          </p-dropdown>
+          <div *ngIf="formControlInvalid('bhno')">
+            <small
+              class="p-error"
+              *ngIf="formControl('bhno').errors?.['required']"
+            >
+              此欄位必須輸入
+            </small>
+          </div>
+        </div>
+
+        <div class="col-12 md:col-2 lg:col-2">
+          <label for="cseq" class="bpaas-required">客戶帳號</label>
+          <input
+            type="text"
+            id="cseq"
+            pInputText
+            formControlName="cseq"
+            maxlength="7"
+            [ngClass]="{ 'ng-dirty': formControlInvalid('cseq') }"
+          />
+          <small *ngIf="formGroup.controls['cseq']?.touched" class="p-error">
+            {{ showErrorMessage("cseq") }}
+          </small>
+        </div>
+        <div
+          class="col-12 md:col-2 lg:col-2 flex"
+          [ngClass]="{
+            'align-items-center pb-1': formControlInvalid('cseq'),
+            'align-items-end': !formControlInvalid('cseq')
+          }"
+        >
+          <p-checkbox
+            [binary]="true"
+            inputId="action"
+            formControlName="action"
+          />
+          <label for="action" class="flex pb-1">不含稅費</label>
+        </div>
+      </div>
+      <div class="grid p-fluid justify-content-end bpaas-button-row">
+        <span class="my-auto mr-2 link-url" (click)="showDialog()">
+          計算方式
+        </span>
+        <div *ngIf="buttonList.query" class="col-12 md:col-3 lg:col-2">
+          <button
+            type="submit"
+            pButton
+            (click)="onSearch()"
+            label="查詢"
+          ></button>
+        </div>
+        <div *ngIf="buttonList.query" class="col-12 md:col-3 lg:col-2">
+          <button
+            type="button"
+            pButton
+            label="清除"
+            class="p-button-outlined mr-2"
+            (click)="onClearForm()"
+          ></button>
+        </div>
+      </div>
+    </form>
+  </p-panel>
+
+  <div class="flex justify-content-between mb-3 align-items-center">
+    <div *ngIf="queryTime">資料查詢時間：{{ queryTime }}</div>
+    <!-- <div *ngIf="hasSearched && buttonList.download" class="text-right">
+      <button
+        pButton
+        type="button"
+        label="匯出 Excel"
+        icon="pi pi-file-excel"
+        (click)="doExportToExcel()"
+      ></button>
+    </div> -->
+  </div>
+
+  <div *ngFor="let item of tableData">
+    <p-panel [header]="item.Currnm[0]" [toggleable]="true">
+      <div class="grid p-fluid border-colors border-top">
+        <div class="col-12 md:col-2 lg:col-2 flex align-items-center">
+          <label for="total_profit_tdy">今日總損益：</label>
+        </div>
+        <div
+          class="col-12 md:col-1 lg:col-1 flex align-items-center justify-content-end"
+        >
+          <span id="total_profit_tdy">{{ item.total_profit_tdy }}</span>
+        </div>
+        <div class="col-12 md:col-2 lg:col-2 flex align-items-center">
+          <label for="unreal_tdy">= 未實現損益：</label>
+        </div>
+        <div
+          class="col-12 md:col-1 lg:col-1 flex align-items-center justify-content-end"
+        >
+          <span id="unreal_tdy">{{ item.unreal_tdy }}</span>
+        </div>
+        <div class="col-12 md:col-2 lg:col-2 flex align-items-center">
+          <label for="profit_tdy">+ 已實現損益：</label>
+        </div>
+        <div
+          class="col-12 md:col-1 lg:col-1 flex align-items-center justify-content-end"
+        >
+          <span id="profit_tdy">{{ item.profit_tdy }}</span>
+        </div>
+        <div class="md:col-3 lg:col-3 flex align-items-center"></div>
+      </div>
+      <div class="grid p-fluid border-colors">
+        <div class="col-12 md:col-2 lg:col-2 flex align-items-center">
+          <label for="total_profit_amass">累計總損益：</label>
+        </div>
+        <div
+          class="col-12 md:col-1 lg:col-1 flex align-items-center justify-content-end"
+        >
+          <span id="total_profit_amass">{{ item.total_profit_amass }}</span>
+        </div>
+        <div class="col-12 md:col-2 lg:col-2 flex align-items-center">
+          <label for="unreal_amass">= 未實現損益：</label>
+        </div>
+        <div
+          class="col-12 md:col-1 lg:col-1 flex align-items-center justify-content-end"
+        >
+          <span id="unreal_amass">{{ item.unreal_amass }}</span>
+        </div>
+        <div class="col-12 md:col-2 lg:col-2 flex align-items-center">
+          <label for="profit_amass">+ 已實現損益(累計)：</label>
+        </div>
+        <div
+          class="col-12 md:col-1 lg:col-1 flex align-items-center justify-content-end"
+        >
+          <span id="profit_amass">{{ item.profit_amass }}</span>
+        </div>
+        <div class="md:col-3 lg:col-3 flex align-items-center"></div>
+      </div>
+      <div class="grid p-fluid border-colors">
+        <div class="col-12 md:col-2 lg:col-2 flex align-items-center">
+          <label for="avacapital">可使用資金：</label>
+        </div>
+        <div
+          class="col-12 md:col-1 lg:col-1 flex align-items-center justify-content-end"
+        >
+          <span id="avacapital">{{ item.avacapital }}</span>
+        </div>
+        <div class="col-12 md:col-2 lg:col-2 flex align-items-center">
+          <label for="capital">= 自訂資金：</label>
+        </div>
+        <div
+          class="col-12 md:col-1 lg:col-1 flex align-items-center justify-content-end"
+        >
+          <span id="capital">{{ item.capital }}</span>
+        </div>
+        <div class="col-12 md:col-2 lg:col-2 flex align-items-center">
+          <label for="hiscapital">+ 歷史應收付：</label>
+        </div>
+        <div
+          class="col-12 md:col-1 lg:col-1 flex align-items-center justify-content-end"
+        >
+          <span id="hiscapital">{{ item.hiscapital }}</span>
+        </div>
+        <div class="md:col-3 lg:col-3 flex align-items-center"></div>
+      </div>
+      <div class="grid p-fluid border-colors">
+        <div class="col-12 md:col-9 lg:col-9 flex align-items-center"></div>
+        <div class="col-12 md:col-2 lg:col-2 flex align-items-center">
+          <label for="tnetamt">+ T日應收付款：</label>
+        </div>
+        <div
+          class="col-12 md:col-1 lg:col-1 flex align-items-center justify-content-end"
+        >
+          <span id="tnetamt">{{ item.tnetamt }}</span>
+        </div>
+      </div>
+      <div class="grid p-fluid border-colors">
+        <div class="col-12 md:col-9 lg:col-9 flex align-items-center"></div>
+        <div class="col-12 md:col-2 lg:col-2 flex align-items-center">
+          <label for="t1netamt">+T+1日應收付款：</label>
+        </div>
+        <div
+          class="col-12 md:col-1 lg:col-1 flex align-items-center justify-content-end"
+        >
+          <span id="t1netamt">{{ item.t1netamt }}</span>
+        </div>
+      </div>
+      <div class="grid p-fluid border-colors">
+        <div class="col-12 md:col-9 lg:col-9 flex align-items-center"></div>
+        <div class="col-12 md:col-2 lg:col-2 flex align-items-center">
+          <label for="t2netamt">+T+2日應收付款：</label>
+        </div>
+        <div
+          class="col-12 md:col-1 lg:col-1 flex align-items-center justify-content-end"
+        >
+          <span id="t2netamt">{{ item.t2netamt }}</span>
+        </div>
+      </div>
+    </p-panel>
+  </div>
+</div>
+
+<div class="card flex justify-content-center">
+  <p-dialog
+    header="計算方式"
+    [modal]="true"
+    [(visible)]="visible"
+    [style]="{ width: '50%' }"
+    [draggable]="false"
+  >
+    <div class="p-count-dialog-container">
+      <div class="title">總損益及資金</div>
+      <div class="content-section">
+        今日總損益 ＝ 即時未實現損益 ＋ 今日已實現損益<br />
+        累計總損益 ＝ 即時未實現損益 ＋ (自2004年之累計總損益 ＋
+        今日已實現損益)<br />
+        可使用資金 ＝ 自訂資金 ＋ 歷史應收付(自訂資金隔日起計算)＋ T日應收付款
+        ＋ T＋1日應收付款 ＋ T＋2 日應收付款<br />
+      </div>
+    </div>
+  </p-dialog>
+</div>

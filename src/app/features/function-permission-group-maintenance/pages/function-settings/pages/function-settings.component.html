@@ -1,0 +1,203 @@
+<div class="mt-3">
+  <!-- 系統參數設定面板 -->
+  <p-panel [header]="titleName" [toggleable]="true">
+    <!-- 查詢表單 -->
+    <form [formGroup]="queryForm">
+      <div class="grid p-fluid">
+        <!-- 資料庫別下拉選單 -->
+        <div class="col-12 md:col-2 lg:col-2">
+          <label for="DBSource" class="bpaas-required">資料庫別</label>
+          <p-dropdown
+            id="DBSource"
+            [options]="options"
+            placeholder="請選擇"
+            formControlName="DBSource"
+            optionValue="value"
+            optionLabel="label"
+            [ngClass]="{ 'ng-dirty': formControlInvalid('DBSource') }"
+          >
+          </p-dropdown>
+          <!-- 錯誤提示 -->
+          <div *ngIf="formControlInvalid('DBSource')">
+            <small
+              class="p-error"
+              *ngIf="formControl('DBSource').errors?.['required']"
+            >
+              此欄位必須輸入
+            </small>
+          </div>
+        </div>
+        <!-- 群組代碼輸入欄位 -->
+        <div class="col-12 md:col-2 lg:col-2">
+          <label for="GroupId">群組代碼</label>
+          <input
+            type="text"
+            id="GroupId"
+            pInputText
+            formControlName="GroupId"
+            maxlength="20"
+          />
+        </div>
+        <!-- 群組名稱輸入欄位 -->
+        <div class="col-12 md:col-2 lg:col-2">
+          <label for="GroupName">群組名稱</label>
+          <input
+            type="text"
+            id="GroupName"
+            pInputText
+            formControlName="GroupName"
+            maxlength="4"
+          />
+        </div>
+        <!-- 狀態選擇 -->
+        <div class="col-12 md:col-3 lg:col-3">
+          <label for="Status">狀態</label>
+          <div class="flex">
+            <div class="flex align-items-center">
+              <p-radioButton
+                formControlName="Status"
+                value=""
+                inputId="Status"
+              />
+              <label for="Status" class="mx-1">全部</label>
+            </div>
+            <div class="flex align-items-center">
+              <p-radioButton
+                formControlName="Status"
+                value="Y"
+                inputId="Status"
+              />
+              <label for="Status" class="mx-1">啟用</label>
+            </div>
+            <div class="flex align-items-center">
+              <p-radioButton
+                formControlName="Status"
+                value="N"
+                inputId="Status"
+              />
+              <label for="Status" class="mx-1">停用</label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- 按鈕列 -->
+      <div class="grid p-fluid justify-content-end bpaas-button-row">
+        <!-- 查詢按鈕 -->
+        <div *ngIf="buttonList.query" class="col-12 md:col-3 lg:col-2">
+          <button
+            type="button"
+            pButton
+            label="查詢"
+            (click)="doQuery()"
+          ></button>
+        </div>
+        <!-- 重設按鈕 -->
+        <div *ngIf="buttonList.query" class="col-12 md:col-3 lg:col-2">
+          <button
+            type="button"
+            pButton
+            label="清除"
+            class="p-button-outlined mr-2"
+            (click)="onClearForm()"
+          ></button>
+        </div>
+      </div>
+    </form>
+  </p-panel>
+  <div *ngIf="queryTime" class="mb-3">資料查詢時間：{{ queryTime }}</div>
+  <!-- 顯示表格和選單列的面板 -->
+  <p-panel [showHeader]="false">
+    <!-- 編輯操作的功能表列（新增、刪除） -->
+    <p-menubar
+      *ngIf="shouldShowMenubar"
+      [model]="editMenu"
+      class="bpaas-detail-menubar"
+    ></p-menubar>
+    <!-- 顯示系統參數資料的表格 -->
+    <p-table
+      #tableComponent
+      [value]="tableData"
+      [columns]="tableColumns"
+      styleClass="p-datatable-gridlines p-datatable-sm p-datatable-striped"
+      [columns]="tableColumns"
+      [paginator]="true"
+      [rows]="10"
+      [rowsPerPageOptions]="[10, 15, 20]"
+      scrollHeight="50vh"
+      [(selection)]="selectedRows"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="顯示第 {first} 至 {last} 筆，共 {totalRecords} 筆"
+      (onRowUnselect)="onSelect()"
+      (onRowSelect)="onSelect()"
+      (onHeaderCheckboxToggle)="onHeaderCheckboxToggle($event)"
+      [(selection)]="selectedRows"
+    >
+      <!-- 表格標頭 -->
+      <ng-template pTemplate="header" let-columns>
+        <tr id="bpaas-table-header">
+          <th scope="col">
+            <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+          </th>
+          <th scope="col">筆數</th>
+          <!-- 動態產生的表頭 -->
+          <th
+            *ngFor="let column of columns"
+            [pSortableColumn]="
+              column.sortable && hasQueryResults ? column.field : ''
+            "
+            [pSortableColumnDisabled]="!column.sortable || !hasQueryResults"
+            scope="col"
+            pResizableColumn
+          >
+            <label for="{{ column.field }}">
+              {{ column.header }}
+            </label>
+            <p-sortIcon
+              *ngIf="column.sortable && hasQueryResults"
+              [field]="column.field"
+            ></p-sortIcon>
+          </th>
+        </tr>
+      </ng-template>
+      <!-- 表格內容 -->
+      <ng-template
+        pTemplate="body"
+        let-rowData
+        let-rowIndex="rowIndex"
+        let-columns="columns"
+      >
+        <tr>
+          <!-- 顯示序號 -->
+          <td
+            alignFrozen="left"
+            pFrozenColumn
+            style="
+              min-width: 42px !important;
+              max-width: 42px !important;
+              width: 42px !important;
+              text-align: center;
+            "
+          >
+            <p-tableCheckbox [value]="rowData"></p-tableCheckbox>
+          </td>
+          <td class="text">{{ rowData.serialNumber }}</td>
+          <!-- 顯示每列資料的儲存格，並包含用於編輯的點擊處理器 -->
+          <td
+            *ngFor="let column of columns"
+            style="cursor: pointer"
+            (click)="doOpenUpdateDialog(rowData)"
+            (keydown)="doOpenUpdateDialog(rowData)"
+          >
+            {{ rowData[column.field] }}
+          </td>
+        </tr>
+      </ng-template>
+      <!-- 搜尋沒有結果的畫面 -->
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td [colSpan]="tableColumns.length + 2">沒有符合條件的資料</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-panel>
+</div>

@@ -1,0 +1,31 @@
+export interface HistoricalStatementDetailsPartial {
+  no: number;
+  tdate: string;
+  dseq: string;
+  dno: string;
+  stock: string;
+  stocknm: string;
+  wtype: string;
+  ttype: string;
+  etype: string;
+  bstype: string;
+  price: number;
+  qty: number;
+  amt: number;
+  fee: number;
+  tax: number;
+  stintax: number;
+  healthfee: number;
+  rvint: number;
+  netamt: number;
+  dbfee: number;
+  cramt: number;
+  dnamt: number;
+  crint: number;
+  dnint: number;
+  dlfee: number;
+  bfint: number;
+  obamt: number;
+  intax: number;
+  currency: string;
+}

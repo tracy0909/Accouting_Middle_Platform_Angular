@@ -1,0 +1,132 @@
+<p-panel>
+  <form [formGroup]="systemForm">
+    <div class="grid p-fluid">
+      <div class="col-12">
+        <label for="VarName">系統變數名稱：</label>
+        <input
+          type="text"
+          id="VarName"
+          pInputText
+          formControlName="VarName"
+          maxlength="20"
+          [ngClass]="{ 'ng-dirty': formControlInvalid('VarName') }"
+        />
+        <div *ngIf="formControlInvalid('VarName')">
+          <small
+            class="p-error"
+            *ngIf="formControl('VarName').errors?.['required']"
+          >
+            此欄位必須輸入
+          </small>
+        </div>
+      </div>
+      <div class="col-12">
+        <label for="Number">序號：</label>
+        <input
+          type="text"
+          id="Number"
+          pInputText
+          formControlName="Number"
+          maxlength="4"
+          [ngClass]="{ 'ng-dirty': formControlInvalid('Number') }"
+        />
+        <div *ngIf="formControlInvalid('Number')">
+          <small
+            class="p-error"
+            *ngIf="formControl('Number').errors?.['required']"
+          >
+            此欄位必須輸入
+          </small>
+        </div>
+      </div>
+      <div class="col-12">
+        <label for="Value">設定值：</label>
+        <input
+          type="text"
+          id="Value"
+          pInputText
+          formControlName="Value"
+          maxlength="20"
+          [ngClass]="{ 'ng-dirty': formControlInvalid('Value') }"
+        />
+        <div *ngIf="formControlInvalid('Value')">
+          <small
+            class="p-error"
+            *ngIf="formControl('Value').errors?.['required']"
+          >
+            此欄位必須輸入
+          </small>
+        </div>
+      </div>
+      <div class="col-12">
+        <label for="VarDesc">說明：</label>
+        <textarea
+          type="text"
+          id="VarDesc"
+          pInputTextarea
+          formControlName="VarDesc"
+          maxlength="50"
+          [rows]="1"
+          [autoResize]="true"
+          [ngClass]="{ 'ng-dirty': formControlInvalid('VarDesc') }"
+        ></textarea>
+        <div *ngIf="formControlInvalid('VarDesc')">
+          <small
+            class="p-error"
+            *ngIf="formControl('VarDesc').errors?.['required']"
+          >
+            此欄位必須輸入
+          </small>
+        </div>
+      </div>
+      <div class="col-6" *ngIf="isEdit">
+        <label for="ModDateTime">更新日期：</label>
+        <span id="ModDateTime">{{ systemForm.get("ModDateTime")?.value }}</span>
+      </div>
+      <div class="col-6" *ngIf="isEdit">
+        <label for="ModUser">更新人員：</label>
+        <span id="ModUser">{{ systemForm.get("ModUser")?.value }}</span>
+      </div>
+    </div>
+  </form>
+</p-panel>
+<div class="flex justify-content-end bpaas-dialog-footer">
+  <div class="mr-2">
+    <button
+      type="button"
+      pButton
+      label="儲存"
+      icon="pi pi-save"
+      (click)="onSubmit()"
+    ></button>
+  </div>
+  <div class="mr-2">
+    <button
+      type="button"
+      pButton
+      label="清除"
+      icon="pi pi-wrench"
+      class="p-button-outlined"
+      (click)="isEdit ? onResetForm() : systemForm.reset()"
+    ></button>
+  </div>
+  <div class="mr-2" *ngIf="buttonList.delete && isEdit">
+    <button
+      type="button"
+      pButton
+      label="刪除"
+      icon="pi pi-trash"
+      (click)="onDelete()"
+    ></button>
+  </div>
+  <div>
+    <button
+      type="button"
+      pButton
+      label="取消"
+      icon="pi pi-times"
+      class="p-button-outlined"
+      (click)="onCloseDialog()"
+    ></button>
+  </div>
+</div>

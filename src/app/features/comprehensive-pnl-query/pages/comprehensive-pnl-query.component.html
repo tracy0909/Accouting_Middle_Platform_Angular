@@ -1,0 +1,744 @@
+<div class="mt-3">
+  <p-panel [header]="titleName" [toggleable]="true">
+    <form [formGroup]="formGroup">
+      <div class="grid p-fluid">
+        <div class="col-12 md:col-2 lg:col-2">
+          <label for="APISERVER" class="bpaas-required">查詢帳中API主機</label>
+          <p-dropdown
+            id="APISERVER"
+            [options]="options"
+            formControlName="APISERVER"
+            optionValue="value"
+            optionLabel="label"
+            placeholder="請選擇"
+            [ngClass]="{ 'ng-dirty': formControlInvalid('APISERVER') }"
+          >
+          </p-dropdown>
+          <div *ngIf="formControlInvalid('APISERVER')">
+            <small
+              class="p-error"
+              *ngIf="formControl('APISERVER').errors?.['required']"
+            >
+              此欄位必須輸入
+            </small>
+          </div>
+        </div>
+        <div class="col-12 md:col-2 lg:col-2">
+          <label for="bhno" class="bpaas-required">分公司</label>
+          <p-dropdown
+            id="bhno"
+            [options]="branchOptions"
+            formControlName="bhno"
+            optionValue="value"
+            optionLabel="label"
+            placeholder="請選擇"
+            [ngClass]="{ 'ng-dirty': formControlInvalid('bhno') }"
+          >
+          </p-dropdown>
+          <div *ngIf="formControlInvalid('bhno')">
+            <small
+              class="p-error"
+              *ngIf="formControl('bhno').errors?.['required']"
+            >
+              此欄位必須輸入
+            </small>
+          </div>
+        </div>
+
+        <div class="col-12 md:col-2 lg:col-2">
+          <label for="cseq" class="bpaas-required">客戶帳號</label>
+          <input
+            type="text"
+            id="cseq"
+            pInputText
+            formControlName="cseq"
+            maxlength="7"
+            [ngClass]="{ 'ng-dirty': formControlInvalid('cseq') }"
+          />
+          <small *ngIf="formGroup.controls['cseq']?.touched" class="p-error">
+            {{ showErrorMessage('cseq') }}
+          </small>
+        </div>
+        <div class="col-12 md:col-4 lg:col-4">
+          <app-stock-suggestions
+            [stockControl]="stockControl"
+            [stockNameControl]="stockNameControl"
+          ></app-stock-suggestions>
+        </div>
+      </div>
+      <div class="grid p-fluid">
+        <div class="col-12 md:col-2 lg:col-2">
+          <label for="ttype">交易類別</label>
+          <p-dropdown
+            id="ttype"
+            [options]="transactionTypeOptions"
+            formControlName="ttype"
+            optionValue="value"
+            optionLabel="label"
+            placeholder="請選擇"
+          >
+          </p-dropdown>
+        </div>
+        <div class="col-12 md:col-2 lg:col-2">
+          <label for="ctype">幣別</label>
+          <p-dropdown
+            id="ctype"
+            [options]="currencyTypeOptions"
+            formControlName="ctype"
+            optionValue="value"
+            optionLabel="label"
+            placeholder="請選擇"
+          >
+          </p-dropdown>
+        </div>
+        <div class="col-12 md:col-2 lg:col-2 flex">
+          <p-checkbox
+            [binary]="true"
+            inputId="binary"
+            class="align-items-end"
+            formControlName="excludeTax"
+          />
+          <label for="taxes" class="flex align-items-end pb-1">不含稅費</label>
+        </div>
+        <div class="col-12 md:col-2 lg:col-2 flex">
+          <p-checkbox
+            [binary]="true"
+            inputId="binary"
+            class="align-items-end"
+            formControlName="excludeExDividend"
+          />
+          <label for="ex-dividend" class="flex align-items-end pb-1"
+            >不計除息金</label
+          >
+        </div>
+        <div class="col-12 md:col-2 lg:col-2 flex">
+          <label for="ctype" class="flex align-items-end pb-1">
+            {{ rootTableData.length > 0 ? rootTableData[0].cntddesc : '' }}
+          </label>
+        </div>
+      </div>
+
+      <div class="grid p-fluid justify-content-end bpaas-button-row">
+        <div class="flex align-items-center w-full">
+          <div class="col-12 md:col-3 lg:col-2 mr-auto">
+            日結狀態：
+            {{ rootTableData.length > 0 ? rootTableData[0].settle_status : '' }}
+          </div>
+          <span class="my-auto mr-2 link-url" (click)="showDialog()">
+            計算方式
+          </span>
+          <div *ngIf="buttonList.query" class="col-12 md:col-3 lg:col-2">
+            <button
+              type="submit"
+              pButton
+              label="查詢"
+              (click)="onSearch()"
+            ></button>
+          </div>
+          <div *ngIf="buttonList.query" class="col-12 md:col-3 lg:col-2">
+            <button
+              type="button"
+              pButton
+              label="清除"
+              class="p-button-outlined mr-2"
+              (click)="onClearForm()"
+            ></button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </p-panel>
+  <div class="flex justify-content-between mb-3 align-items-center">
+    <div *ngIf="queryTime">資料查詢時間：{{ queryTime }}</div>
+    <!-- <div *ngIf="hasSearched && buttonList.download" class="text-right">
+      <button
+        pButton
+        type="button"
+        label="匯出 Excel"
+        icon="pi pi-file-excel"
+        (click)="doExportToExcel()"
+      ></button>
+    </div> -->
+  </div>
+</div>
+
+<div>
+  <p-panel header="昨日庫存未實現損益" [toggleable]="true">
+    <p-table
+      #unoffsetYestTableComponent
+      [value]="unoffsetYestFilterData"
+      [totalRecords]="unoffsetYestFilterData.length"
+      [columns]="unoffsetYestTableColumns"
+      [paginator]="true"
+      [rows]="10"
+      [showCurrentPageReport]="true"
+      [rowsPerPageOptions]="[10, 15, 20]"
+      scrollHeight="50vh"
+      [scrollable]="true"
+      styleClass="p-datatable-gridlines p-datatable-sm p-datatable-striped"
+      [resizableColumns]="true"
+      currentPageReportTemplate="顯示第 {first} 至 {last} 筆，共 {totalRecords} 筆"
+    >
+      <ng-template pTemplate="header">
+        <tr id="bpaas-table-header">
+          <th scope="col">項次</th>
+          <th
+            *ngFor="let column of unoffsetYestTableColumns"
+            [pSortableColumn]="column.sortable ? column.field : ''"
+            [pSortableColumnDisabled]="
+              column.sortable && column.field !== 'no' ? false : true
+            "
+            [id]="'th-' + column.header"
+            pResizableColumn
+          >
+            {{ column.header }}
+            <p-sortIcon
+              *ngIf="column.sortable && column.field !== 'no'"
+              [field]="column.field"
+            ></p-sortIcon>
+          </th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-rowData>
+        <tr>
+          <td class="text">{{ rowData.serialNumber }}</td>
+          <td
+            *ngFor="let header of unoffsetYestTableColumns"
+            [class.bpaas-align-right]="header.numberField"
+          >
+            <ng-container *ngIf="header.numberField">
+              {{
+                rowData[header.field] ??
+                  (header.numberFieldDefaultZero ? 0 : '') | dynamicDecimal
+              }}
+            </ng-container>
+            <ng-container *ngIf="!header.numberField">
+              {{ rowData[header.field] }}
+            </ng-container>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td [colSpan]="unoffsetYestTableColumns.length + 1">
+            沒有符合條件的資料
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-panel>
+
+  <p-panel header="昨日庫存未實現損益 - 合計" [toggleable]="true">
+    <p-table
+      [value]="unoffsetYestFilterTotalData"
+      [columns]="unoffsetYestTotalTableColumns"
+      scrollHeight="50vh"
+      styleClass="p-datatable-gridlines p-datatable-sm p-datatable-striped"
+      [totalRecords]="unoffsetYestFilterData.length"
+    >
+      <ng-template pTemplate="header" let-columns>
+        <tr id="bpaas-table-header">
+          <th
+            *ngFor="let column of columns"
+            [pSortableColumn]="column.sortable ? column.field : ''"
+            [pSortableColumnDisabled]="column.sortable ? false : true"
+            scope="col"
+            pResizableColumn
+          >
+            <label for="{{ column.field }}">
+              {{ column.header }}
+            </label>
+            <p-sortIcon
+              *ngIf="column.sortable"
+              [field]="column.field"
+            ></p-sortIcon>
+          </th>
+        </tr>
+      </ng-template>
+      <ng-template
+        pTemplate="body"
+        let-rowData
+        let-rowIndex="rowIndex"
+        let-columns="columns"
+      >
+        <tr>
+          <td
+            *ngFor="let column of columns"
+            [class.bpaas-align-right]="column.numberField"
+          >
+            <ng-container *ngIf="column.numberField">
+              {{
+                rowData[column.field] ??
+                  (column.numberFieldDefaultZero ? 0 : '') | dynamicDecimal
+              }}
+            </ng-container>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td [colSpan]="unoffsetYestTotalTableColumns.length + 2">
+            沒有符合條件的資料
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-panel>
+</div>
+
+<div>
+  <p-panel header="今日新增部位未實現損益" [toggleable]="true">
+    <p-table
+      #unoffsetTdyaddTableComponent
+      [value]="unoffsetTdyaddFilterData"
+      [totalRecords]="unoffsetTdyaddFilterData.length"
+      [columns]="unoffsetTdyaddTableColumns"
+      [paginator]="true"
+      [rows]="10"
+      [showCurrentPageReport]="true"
+      [rowsPerPageOptions]="[10, 15, 20]"
+      scrollHeight="50vh"
+      [scrollable]="true"
+      styleClass="p-datatable-gridlines p-datatable-sm p-datatable-striped"
+      [resizableColumns]="true"
+      currentPageReportTemplate="顯示第 {first} 至 {last} 筆，共 {totalRecords} 筆"
+    >
+      <ng-template pTemplate="header">
+        <tr id="bpaas-table-header">
+          <th scope="col">項次</th>
+          <th
+            *ngFor="let column of unoffsetTdyaddTableColumns"
+            [pSortableColumn]="column.sortable ? column.field : ''"
+            [pSortableColumnDisabled]="
+              column.sortable && column.field !== 'no' ? false : true
+            "
+            [id]="'th-' + column.header"
+            pResizableColumn
+          >
+            {{ column.header }}
+            <p-sortIcon
+              *ngIf="column.sortable && column.field !== 'no'"
+              [field]="column.field"
+            ></p-sortIcon>
+          </th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-rowData>
+        <tr>
+          <td class="text">{{ rowData.serialNumber }}</td>
+          <td
+            *ngFor="let header of unoffsetTdyaddTableColumns"
+            [class.bpaas-align-right]="header.numberField"
+          >
+            <ng-container *ngIf="header.numberField">
+              {{
+                rowData[header.field] ??
+                  (header.numberFieldDefaultZero ? 0 : '') | dynamicDecimal
+              }}
+            </ng-container>
+            <ng-container *ngIf="!header.numberField">
+              {{ rowData[header.field] }}
+            </ng-container>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td [colSpan]="unoffsetTdyaddTableColumns.length + 1">
+            沒有符合條件的資料
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-panel>
+
+  <p-panel header="今日新增部位未實現損益 - 合計" [toggleable]="true">
+    <p-table
+      [value]="unoffsetTdyaddFilterTotalData"
+      [columns]="unoffsetTdyaddTotalTableColumns"
+      scrollHeight="50vh"
+      styleClass="p-datatable-gridlines p-datatable-sm p-datatable-striped"
+      [totalRecords]="unoffsetTdyaddFilterData.length"
+    >
+      <ng-template pTemplate="header" let-columns>
+        <tr id="bpaas-table-header">
+          <th
+            *ngFor="let column of columns"
+            [pSortableColumn]="column.sortable ? column.field : ''"
+            [pSortableColumnDisabled]="column.sortable ? false : true"
+            scope="col"
+            pResizableColumn
+          >
+            <label for="{{ column.field }}">
+              {{ column.header }}
+            </label>
+            <p-sortIcon
+              *ngIf="column.sortable"
+              [field]="column.field"
+            ></p-sortIcon>
+          </th>
+        </tr>
+      </ng-template>
+      <ng-template
+        pTemplate="body"
+        let-rowData
+        let-rowIndex="rowIndex"
+        let-columns="columns"
+      >
+        <tr>
+          <td
+            *ngFor="let column of columns"
+            [class.bpaas-align-right]="column.numberField"
+          >
+            <ng-container *ngIf="column.numberField">
+              {{
+                rowData[column.field] ??
+                  (column.numberFieldDefaultZero ? 0 : '') | dynamicDecimal
+              }}
+            </ng-container>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td [colSpan]="unoffsetTdyaddTotalTableColumns.length + 2">
+            沒有符合條件的資料
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-panel>
+</div>
+
+<div>
+  <p-panel header="當沖已實現損益" [toggleable]="true">
+    <p-table
+      #offsetCdtdTableComponent
+      [value]="offsetCdtdFilterData"
+      [totalRecords]="offsetCdtdFilterData.length"
+      [columns]="offsetCdtdTableColumns"
+      [paginator]="true"
+      [rows]="10"
+      [showCurrentPageReport]="true"
+      [rowsPerPageOptions]="[10, 15, 20]"
+      scrollHeight="50vh"
+      [scrollable]="true"
+      styleClass="p-datatable-gridlines p-datatable-sm p-datatable-striped"
+      [resizableColumns]="true"
+      currentPageReportTemplate="顯示第 {first} 至 {last} 筆，共 {totalRecords} 筆"
+    >
+      <ng-template pTemplate="header">
+        <tr id="bpaas-table-header">
+          <th scope="col">項次</th>
+          <th
+            *ngFor="let column of offsetCdtdTableColumns"
+            [pSortableColumn]="column.sortable ? column.field : ''"
+            [pSortableColumnDisabled]="
+              column.sortable && column.field !== 'no' ? false : true
+            "
+            [id]="'th-' + column.header"
+            pResizableColumn
+          >
+            {{ column.header }}
+            <p-sortIcon
+              *ngIf="column.sortable && column.field !== 'no'"
+              [field]="column.field"
+            ></p-sortIcon>
+          </th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-rowData>
+        <tr>
+          <td class="text">{{ rowData.serialNumber }}</td>
+          <td
+            *ngFor="let header of offsetCdtdTableColumns"
+            [class.bpaas-align-right]="header.numberField"
+          >
+            <ng-container *ngIf="header.numberField">
+              {{
+                rowData[header.field] ??
+                  (header.numberFieldDefaultZero ? 0 : '') | dynamicDecimal
+              }}
+            </ng-container>
+            <ng-container *ngIf="!header.numberField">
+              {{ rowData[header.field] }}
+            </ng-container>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td [colSpan]="offsetCdtdTableColumns.length + 1">
+            沒有符合條件的資料
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-panel>
+
+  <p-panel header="當沖已實現損益 - 合計" [toggleable]="true">
+    <p-table
+      [value]="offsetCdtdFilterTotalData"
+      [columns]="offsetCdtdTotalTableColumns"
+      scrollHeight="50vh"
+      styleClass="p-datatable-gridlines p-datatable-sm p-datatable-striped"
+      [totalRecords]="offsetCdtdFilterData.length"
+    >
+      <ng-template pTemplate="header" let-columns>
+        <tr id="bpaas-table-header">
+          <th
+            *ngFor="let column of columns"
+            [pSortableColumn]="column.sortable ? column.field : ''"
+            [pSortableColumnDisabled]="column.sortable ? false : true"
+            scope="col"
+            pResizableColumn
+          >
+            <label for="{{ column.field }}">
+              {{ column.header }}
+            </label>
+            <p-sortIcon
+              *ngIf="column.sortable"
+              [field]="column.field"
+            ></p-sortIcon>
+          </th>
+        </tr>
+      </ng-template>
+      <ng-template
+        pTemplate="body"
+        let-rowData
+        let-rowIndex="rowIndex"
+        let-columns="columns"
+      >
+        <tr>
+          <td
+            *ngFor="let column of columns"
+            [class.bpaas-align-right]="column.numberField"
+          >
+            <ng-container *ngIf="column.numberField">
+              {{
+                rowData[column.field] ??
+                  (column.numberFieldDefaultZero ? 0 : '') | dynamicDecimal
+              }}
+            </ng-container>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td [colSpan]="unoffsetTdyaddTotalTableColumns.length + 2">
+            沒有符合條件的資料
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-panel>
+</div>
+
+<div>
+  <p-panel header="今日清償昨日庫存已實現損益" [toggleable]="true">
+    <p-table
+      #offsetTdyTableComponent
+      [value]="offsetTdyFilterData"
+      [totalRecords]="offsetTdyFilterData.length"
+      [columns]="offsetTdyTableColumns"
+      [paginator]="true"
+      [rows]="10"
+      [showCurrentPageReport]="true"
+      [rowsPerPageOptions]="[10, 15, 20]"
+      scrollHeight="50vh"
+      [scrollable]="true"
+      styleClass="p-datatable-gridlines p-datatable-sm p-datatable-striped"
+      [resizableColumns]="true"
+      currentPageReportTemplate="顯示第 {first} 至 {last} 筆，共 {totalRecords} 筆"
+    >
+      <ng-template pTemplate="header">
+        <tr id="bpaas-table-header">
+          <th scope="col">項次</th>
+          <th
+            *ngFor="let column of offsetTdyTableColumns"
+            [pSortableColumn]="column.sortable ? column.field : ''"
+            [pSortableColumnDisabled]="
+              column.sortable && column.field !== 'no' ? false : true
+            "
+            [id]="'th-' + column.header"
+            pResizableColumn
+          >
+            {{ column.header }}
+            <p-sortIcon
+              *ngIf="column.sortable && column.field !== 'no'"
+              [field]="column.field"
+            ></p-sortIcon>
+          </th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-rowData>
+        <tr>
+          <td class="text">{{ rowData.serialNumber }}</td>
+          <td
+            *ngFor="let header of offsetTdyTableColumns"
+            [class.bpaas-align-right]="header.numberField"
+          >
+            <ng-container *ngIf="header.numberField">
+              {{
+                rowData[header.field] ??
+                  (header.numberFieldDefaultZero ? 0 : '') | dynamicDecimal
+              }}
+            </ng-container>
+            <ng-container *ngIf="!header.numberField">
+              {{ rowData[header.field] }}
+            </ng-container>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td [colSpan]="offsetTdyTableColumns.length + 1">
+            沒有符合條件的資料
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-panel>
+
+  <p-panel header="今日清償昨日庫存已實現損益 - 合計" [toggleable]="true">
+    <p-table
+      [value]="offsetTdyFilterTotalData"
+      [columns]="offsetTdyTotalTableColumns"
+      scrollHeight="50vh"
+      styleClass="p-datatable-gridlines p-datatable-sm p-datatable-striped"
+      [totalRecords]="offsetTdyFilterData.length"
+    >
+      <ng-template pTemplate="header" let-columns>
+        <tr id="bpaas-table-header">
+          <th
+            *ngFor="let column of columns"
+            [pSortableColumn]="column.sortable ? column.field : ''"
+            [pSortableColumnDisabled]="column.sortable ? false : true"
+            scope="col"
+            pResizableColumn
+          >
+            <label for="{{ column.field }}">
+              {{ column.header }}
+            </label>
+            <p-sortIcon
+              *ngIf="column.sortable"
+              [field]="column.field"
+            ></p-sortIcon>
+          </th>
+        </tr>
+      </ng-template>
+      <ng-template
+        pTemplate="body"
+        let-rowData
+        let-rowIndex="rowIndex"
+        let-columns="columns"
+      >
+        <tr>
+          <td
+            *ngFor="let column of columns"
+            [class.bpaas-align-right]="column.numberField"
+          >
+            <ng-container *ngIf="column.numberField">
+              {{
+                rowData[column.field] ??
+                  (column.numberFieldDefaultZero ? 0 : '') | dynamicDecimal
+              }}
+            </ng-container>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td [colSpan]="unoffsetTdyaddTotalTableColumns.length + 2">
+            沒有符合條件的資料
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-panel>
+</div>
+
+<div class="card flex justify-content-center">
+  <p-dialog
+    header="計算方式 "
+    [modal]="true"
+    [(visible)]="visible"
+    [style]="{ width: '50%', height: '80%' }"
+    [draggable]="false"
+  >
+    <div class="p-count-dialog-container">
+      <div class="title">昨日庫存未實現損益</div>
+      <div class="content-section">
+        <div class="text">現股：</div>
+        昨日餘額（盤中）＝ 昨日餘額 － 今日賣出<br />
+        付出成本 ＝ 買進價金 ＋ 手續費 - 累積配息<br />
+        成本均價 ＝ 付出成本 ÷ 庫存股數<br />
+        現值 ＝ 現價 × 即時庫存 － 相關稅費<br />
+        損益試算 ＝ 現值－付出成本<br />
+        獲利率 ＝ 損益試算 ÷ 付出成本 × 100%<br />
+      </div>
+      <div class="content-section">
+        <div class="text">融資：</div>
+        昨日餘額（盤中）＝ 昨日餘額 － 今日賣出<br />
+        付出成本 ＝ 自備款 ＋ 手續費 ※ 自備款 ＝ 買進價金 － 融資金額<br />
+        成本均價 ＝（買進價金 ＋ 手續費）÷ 庫存股數<br />
+        現值 ＝ 現價 × 即時庫存 －（融資金額 ＋ 利息 ＋ 相關稅費）<br />
+      </div>
+      <div class="content-section">
+        <div class="text">融券：</div>
+        昨日餘額（盤中）＝ 昨日餘額－今日買進<br />
+        付出成本 ＝ 保證金<br />
+        成本均價 ＝ 擔保品÷庫存股數 ※ 擔保品 ＝ 賣出價金 － 相關稅費<br />
+        現值 ＝ 保證金 ＋ 擔保品 ＋ 利息收入－（現價 × 庫存股數 ＋ 手續費 -
+        標借費 - 標借利息 + 追繳保證金）<br />
+      </div>
+      <div class="title">今日新增部位未實現損益</div>
+      <div class="content-section">
+        <div class="text">現股：</div>
+        即時庫存 ＝ 今日總買入股數<br />
+        <div class="text">融資：</div>
+        融資 ＝ 今日總買入股數<br />
+        <div class="text">融券：</div>
+        融券 ＝ 今日總賣出股數<br />
+      </div>
+      <div class="title">當沖已實現損益</div>
+      <div class="content-section">
+        <div class="text">信用當沖：</div>
+        資買均價 ＝（買進價金 ＋ 手續費）÷ 沖銷股數<br />
+        券賣均價 ＝（賣出價金 － 相關稅費）÷ 沖銷股數<br />
+        損益試算 ＝（股數 × 券賣均價 - 相關稅費）－（股數 × 資買均價 ＋
+        資買手續費）<br />
+      </div>
+      <div class="content-section">
+        <div class="text">現股當沖：</div>
+        買進均價 ＝（買進價金 ＋ 手續費）÷ 沖銷股數<br />
+        賣出均價 ＝（賣出價金 － 相關稅費）÷ 沖銷股數<br />
+        損益試算 ＝（股數 × 賣出均價 - 相關稅費）－（股數 × 買進均價 ＋
+        買進手續費）<br />
+      </div>
+      <div class="title">今日清償昨日庫存已實現損益</div>
+      <div class="content-section">
+        <div class="text">現股：</div>
+        成交均價 ＝ 賣出價金 ÷ 股數<br />
+        付出成本 ＝ 買進價金 ＋ 手續費 - 累積配息<br />
+        收入 ＝ 賣出價金 － 相關稅費<br />
+        損益試算 ＝ 收入 － 付出成本<br />
+      </div>
+      <div class="content-section">
+        <div class="text">融資：</div>
+        成交均價 ＝ 賣出價金 ÷ 股數<br />
+        付出成本 ＝ 自備款 + 手續費<br />
+        收入 ＝ 賣出價金 － 相關稅費 －（融資金額 ＋ 融資利息）<br />
+        損益試算 ＝ 收入 － 付出成本<br />
+      </div>
+      <div class="content-section">
+        <div class="text">融券：</div>
+        成交均價 ＝ 買進價金 ÷ 股數<br />
+        付出成本 ＝ 保證金<br />
+        收入 ＝ 保證金 ＋ 擔保品 ＋ 利息收入 －（買進價金 ＋ 手續費）- 標借費 -
+        標借利息 + 追繳保證金<br />
+        損益試算 ＝ 收入 － 付出成本<br />
+      </div>
+    </div>
+  </p-dialog>
+</div>
